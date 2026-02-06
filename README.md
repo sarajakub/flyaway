@@ -2,6 +2,12 @@
 
 A mindful iOS app for emotional healing and personal growth. Write or vocalize thoughts, send them into the ether, or hold onto them. Connect with others on their healing journey.
 
+<div align="center">
+  <img width="240" height="524" alt="create-thought-020525" src="https://github.com/user-attachments/assets/da0a210b-3702-4cb4-90d7-31e4c4111b82">
+  <br>
+  <sub>Thought Creation Page</sub>
+</div>
+
 ## Features
 
 ### 🌟 Core Features
