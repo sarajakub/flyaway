@@ -1,0 +1,597 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3997C17F11AF8747FFA7790C /* Pods_FlyAway.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6AD9C46EB6C7FEB2ACD8CBA /* Pods_FlyAway.framework */; };
+		5661CBA12F366C7800D813EB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5661CBA02F366C7800D813EB /* GoogleService-Info.plist */; };
+		569565052F366260005E8DE0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569565022F366260005E8DE0 /* ProfileView.swift */; };
+		569565062F366260005E8DE0 /* ThoughtCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564FE2F366260005E8DE0 /* ThoughtCard.swift */; };
+		569565082F366260005E8DE0 /* CommunityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564F92F366260005E8DE0 /* CommunityView.swift */; };
+		569565092F366260005E8DE0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564FD2F366260005E8DE0 /* HomeView.swift */; };
+		5695650D2F366260005E8DE0 /* MindfulnessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569565002F366260005E8DE0 /* MindfulnessView.swift */; };
+		5695650E2F366260005E8DE0 /* CreateThoughtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564FB2F366260005E8DE0 /* CreateThoughtView.swift */; };
+		5695650F2F366260005E8DE0 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564F72F366260005E8DE0 /* AuthenticationView.swift */; };
+		569565102F366260005E8DE0 /* ThoughtManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569564F52F366260005E8DE0 /* ThoughtManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		5661CBA02F366C7800D813EB /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		56683DA62F3666530063B444 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
+		568791AC2F3660DD00686917 /* FlyAway.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlyAway.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		569564F02F366260005E8DE0 /* MindfulnessResource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindfulnessResource.swift; sourceTree = "<group>"; };
+		569564F12F366260005E8DE0 /* Thought.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thought.swift; sourceTree = "<group>"; };
+		569564F22F366260005E8DE0 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		569564F42F366260005E8DE0 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		569564F52F366260005E8DE0 /* ThoughtManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThoughtManager.swift; sourceTree = "<group>"; };
+		569564F72F366260005E8DE0 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		569564F92F366260005E8DE0 /* CommunityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityView.swift; sourceTree = "<group>"; };
+		569564FB2F366260005E8DE0 /* CreateThoughtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateThoughtView.swift; sourceTree = "<group>"; };
+		569564FD2F366260005E8DE0 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		569564FE2F366260005E8DE0 /* ThoughtCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThoughtCard.swift; sourceTree = "<group>"; };
+		569565002F366260005E8DE0 /* MindfulnessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MindfulnessView.swift; sourceTree = "<group>"; };
+		569565022F366260005E8DE0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		A6AD9C46EB6C7FEB2ACD8CBA /* Pods_FlyAway.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FlyAway.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B033A4FFA0CACB9C9ABDC410 /* Pods-FlyAway.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlyAway.debug.xcconfig"; path = "../FlyAway/Pods/Target Support Files/Pods-FlyAway/Pods-FlyAway.debug.xcconfig"; sourceTree = "<group>"; };
+		E01DA5677AD753B09AA978B8 /* Pods-FlyAway.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FlyAway.release.xcconfig"; path = "../FlyAway/Pods/Target Support Files/Pods-FlyAway/Pods-FlyAway.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		569565112F366283005E8DE0 /* Exceptions for "FlyAway" folder in "FlyAway" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Services/ThoughtManager.swift,
+				Views/Community/CommunityView.swift,
+				Views/Create/CreateThoughtView.swift,
+				Views/Home/HomeView.swift,
+				Views/Home/ThoughtCard.swift,
+				Views/Mindfulness/MindfulnessView.swift,
+				Views/Profile/ProfileView.swift,
+			);
+			target = 568791AB2F3660DD00686917 /* FlyAway */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		568791AE2F3660DD00686917 /* FlyAway */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				569565112F366283005E8DE0 /* Exceptions for "FlyAway" folder in "FlyAway" target */,
+			);
+			path = FlyAway;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		568791A92F3660DD00686917 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3997C17F11AF8747FFA7790C /* Pods_FlyAway.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07AE0AC8682301BAE40D10B9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				B033A4FFA0CACB9C9ABDC410 /* Pods-FlyAway.debug.xcconfig */,
+				E01DA5677AD753B09AA978B8 /* Pods-FlyAway.release.xcconfig */,
+			);
+			name = Pods;
+			path = ../Pods;
+			sourceTree = "<group>";
+		};
+		5661CB342F366AE500D813EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		568791A32F3660DD00686917 = {
+			isa = PBXGroup;
+			children = (
+				5661CBA02F366C7800D813EB /* GoogleService-Info.plist */,
+				569564F32F366260005E8DE0 /* Models */,
+				569564F62F366260005E8DE0 /* Services */,
+				569565042F366260005E8DE0 /* Views */,
+				568791AE2F3660DD00686917 /* FlyAway */,
+				568791AD2F3660DD00686917 /* Products */,
+				07AE0AC8682301BAE40D10B9 /* Pods */,
+				895DB8D0087AB4217610C319 /* Frameworks */,
+				56683DA62F3666530063B444 /* Pods.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		568791AD2F3660DD00686917 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				568791AC2F3660DD00686917 /* FlyAway.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		569564F32F366260005E8DE0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				569564F02F366260005E8DE0 /* MindfulnessResource.swift */,
+				569564F12F366260005E8DE0 /* Thought.swift */,
+				569564F22F366260005E8DE0 /* User.swift */,
+			);
+			name = Models;
+			path = FlyAway/Models;
+			sourceTree = "<group>";
+		};
+		569564F62F366260005E8DE0 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				569564F42F366260005E8DE0 /* AuthenticationManager.swift */,
+				569564F52F366260005E8DE0 /* ThoughtManager.swift */,
+			);
+			name = Services;
+			path = FlyAway/Services;
+			sourceTree = "<group>";
+		};
+		569564F82F366260005E8DE0 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				569564F72F366260005E8DE0 /* AuthenticationView.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		569564FA2F366260005E8DE0 /* Community */ = {
+			isa = PBXGroup;
+			children = (
+				569564F92F366260005E8DE0 /* CommunityView.swift */,
+			);
+			path = Community;
+			sourceTree = "<group>";
+		};
+		569564FC2F366260005E8DE0 /* Create */ = {
+			isa = PBXGroup;
+			children = (
+				569564FB2F366260005E8DE0 /* CreateThoughtView.swift */,
+			);
+			path = Create;
+			sourceTree = "<group>";
+		};
+		569564FF2F366260005E8DE0 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				569564FD2F366260005E8DE0 /* HomeView.swift */,
+				569564FE2F366260005E8DE0 /* ThoughtCard.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		569565012F366260005E8DE0 /* Mindfulness */ = {
+			isa = PBXGroup;
+			children = (
+				569565002F366260005E8DE0 /* MindfulnessView.swift */,
+			);
+			path = Mindfulness;
+			sourceTree = "<group>";
+		};
+		569565032F366260005E8DE0 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				569565022F366260005E8DE0 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		569565042F366260005E8DE0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				569564F82F366260005E8DE0 /* Authentication */,
+				569564FA2F366260005E8DE0 /* Community */,
+				569564FC2F366260005E8DE0 /* Create */,
+				569564FF2F366260005E8DE0 /* Home */,
+				569565012F366260005E8DE0 /* Mindfulness */,
+				569565032F366260005E8DE0 /* Profile */,
+			);
+			name = Views;
+			path = FlyAway/Views;
+			sourceTree = "<group>";
+		};
+		895DB8D0087AB4217610C319 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A6AD9C46EB6C7FEB2ACD8CBA /* Pods_FlyAway.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		568791AB2F3660DD00686917 /* FlyAway */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 568791B72F3660DE00686917 /* Build configuration list for PBXNativeTarget "FlyAway" */;
+			buildPhases = (
+				4C5B542D9C5BD694A0EA8B9A /* [CP] Check Pods Manifest.lock */,
+				568791A82F3660DD00686917 /* Sources */,
+				568791A92F3660DD00686917 /* Frameworks */,
+				568791AA2F3660DD00686917 /* Resources */,
+				6B7FAA71CCF929559D62A509 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				568791AE2F3660DD00686917 /* FlyAway */,
+			);
+			name = FlyAway;
+			productName = FlyAway;
+			productReference = 568791AC2F3660DD00686917 /* FlyAway.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		568791A42F3660DD00686917 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					568791AB2F3660DD00686917 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 568791A72F3660DD00686917 /* Build configuration list for PBXProject "FlyAway" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 568791A32F3660DD00686917;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 568791AD2F3660DD00686917 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 5661CB342F366AE500D813EB /* Products */;
+					ProjectRef = 56683DA62F3666530063B444 /* Pods.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				568791AB2F3660DD00686917 /* FlyAway */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		568791AA2F3660DD00686917 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5661CBA12F366C7800D813EB /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4C5B542D9C5BD694A0EA8B9A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-FlyAway-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6B7FAA71CCF929559D62A509 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FlyAway/Pods-FlyAway-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FlyAway/Pods-FlyAway-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FlyAway/Pods-FlyAway-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		568791A82F3660DD00686917 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				569565052F366260005E8DE0 /* ProfileView.swift in Sources */,
+				569565062F366260005E8DE0 /* ThoughtCard.swift in Sources */,
+				569565082F366260005E8DE0 /* CommunityView.swift in Sources */,
+				569565092F366260005E8DE0 /* HomeView.swift in Sources */,
+				5695650D2F366260005E8DE0 /* MindfulnessView.swift in Sources */,
+				5695650E2F366260005E8DE0 /* CreateThoughtView.swift in Sources */,
+				5695650F2F366260005E8DE0 /* AuthenticationView.swift in Sources */,
+				569565102F366260005E8DE0 /* ThoughtManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		568791B52F3660DE00686917 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = J7674D9SW9;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		568791B62F3660DE00686917 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = J7674D9SW9;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		568791B82F3660DE00686917 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B033A4FFA0CACB9C9ABDC410 /* Pods-FlyAway.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = J7674D9SW9;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SaraJakubowicz.FlyAway;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		568791B92F3660DE00686917 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E01DA5677AD753B09AA978B8 /* Pods-FlyAway.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = J7674D9SW9;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.SaraJakubowicz.FlyAway;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		568791A72F3660DD00686917 /* Build configuration list for PBXProject "FlyAway" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				568791B52F3660DE00686917 /* Debug */,
+				568791B62F3660DE00686917 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		568791B72F3660DE00686917 /* Build configuration list for PBXNativeTarget "FlyAway" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				568791B82F3660DE00686917 /* Debug */,
+				568791B92F3660DE00686917 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 568791A42F3660DD00686917 /* Project object */;
+}
