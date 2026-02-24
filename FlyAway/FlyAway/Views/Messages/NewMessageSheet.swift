@@ -7,6 +7,11 @@ struct NewMessageSheet: View {
     @State private var recipientName = ""
     @State private var messageText = ""
     @State private var isSending = false
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case recipient, message
+    }
     
     var body: some View {
         NavigationView {
@@ -37,6 +42,11 @@ struct NewMessageSheet: View {
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(12)
+                        .focused($focusedField, equals: .recipient)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            focusedField = .message
+                        }
                 }
                 .padding(.horizontal)
                 
@@ -54,6 +64,7 @@ struct NewMessageSheet: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.purple.opacity(0.3), lineWidth: 1)
                         )
+                        .focused($focusedField, equals: .message)
                 }
                 .padding(.horizontal)
                 
@@ -84,11 +95,21 @@ struct NewMessageSheet: View {
                 Spacer()
             }
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .onAppear {
+                // Auto-focus recipient field when sheet appears
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    focusedField = .recipient
+                }
+            }
         }
     }
     
     private func sendMessage() {
         isSending = true
+        focusedField = nil
+        
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
         
         Task {
             await messageManager.sendMessage(to: recipientName, content: messageText)

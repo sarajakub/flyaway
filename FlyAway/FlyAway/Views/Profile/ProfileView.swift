@@ -5,6 +5,7 @@ struct ProfileView: View {
     @EnvironmentObject var thoughtManager: ThoughtManager
     @State private var showingSavedThoughts = false
     @State private var showingSettings = false
+    @State private var showingSignOutConfirm = false
     @State private var thoughtCount = 0
     
     var body: some View {
@@ -71,15 +72,23 @@ struct ProfileView: View {
                             MenuItemView(icon: "bookmark.fill", title: "Saved Thoughts", color: .purple)
                         }
                         Divider().padding(.leading, 60)
-                        NavigationLink(destination: Text("My Journey - Coming Soon")) {
+                        NavigationLink(destination: EmotionTrackingView()) {
+                            MenuItemView(icon: "heart.text.square.fill", title: "Emotion Tracking", color: .pink)
+                        }
+                        Divider().padding(.leading, 60)
+                        NavigationLink(destination: MyJourneyView()) {
                             MenuItemView(icon: "chart.line.uptrend.xyaxis", title: "My Journey", color: .blue)
+                        }
+                        Divider().padding(.leading, 60)
+                        NavigationLink(destination: MindfulnessView()) {
+                            MenuItemView(icon: "leaf.fill", title: "Mindfulness", color: .green)
                         }
                         Divider().padding(.leading, 60)
                         Button(action: { showingSettings = true }) {
                             MenuItemView(icon: "gear", title: "Settings", color: .gray)
                         }
                         Divider().padding(.leading, 60)
-                        NavigationLink(destination: Text("Help & Support - Coming Soon")) {
+                        NavigationLink(destination: HelpSupportView()) {
                             MenuItemView(icon: "questionmark.circle", title: "Help & Support", color: .orange)
                         }
                     }
@@ -89,7 +98,7 @@ struct ProfileView: View {
                     .padding(.horizontal)
                     
                     Button(action: {
-                        authManager.signOut()
+                        showingSignOutConfirm = true
                     }) {
                         Text("Sign Out")
                             .font(.headline)
@@ -111,6 +120,14 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsSheet(authManager: authManager)
+            }
+            .confirmationDialog("Sign Out", isPresented: $showingSignOutConfirm) {
+                Button("Sign Out", role: .destructive) {
+                    authManager.signOut()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Are you sure you want to sign out?")
             }
         }
     }
@@ -163,13 +180,47 @@ struct SavedThoughtsSheet: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(thoughtManager.savedThoughts) { thought in
-                        ThoughtCard(thought: thought)
+            Group {
+                if thoughtManager.isLoading {
+                    ProgressView()
+                        .frame(maxHeight: .infinity)
+                } else if thoughtManager.savedThoughts.isEmpty {
+                    VStack(spacing: 24) {
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 80))
+                            .foregroundColor(.purple.opacity(0.6))
+                        
+                        VStack(spacing: 8) {
+                            Text("No Saved Thoughts")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            
+                            Text("Thoughts you save from the community will appear here")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(thoughtManager.savedThoughts) { thought in
+                                ThoughtCard(thought: thought)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            Task {
+                                                await thoughtManager.unsaveThought(thought)
+                                            }
+                                        } label: {
+                                            Label("Remove from Saved", systemImage: "bookmark.slash")
+                                        }
+                                    }
+                            }
+                        }
+                        .padding()
                     }
                 }
-                .padding()
             }
             .navigationTitle("Saved Thoughts")
             .navigationBarTitleDisplayMode(.inline)
@@ -177,6 +228,12 @@ struct SavedThoughtsSheet: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .task {
+                await thoughtManager.fetchSavedThoughts()
+            }
+            .refreshable {
+                await thoughtManager.fetchSavedThoughts()
             }
         }
     }

@@ -9,11 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authManager: AuthenticationManager
-    
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                MainTabView()
+                if hasSeenOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingView()
+                }
             } else {
                 AuthenticationView()
             }
@@ -23,7 +28,6 @@ struct ContentView: View {
 
 struct MainTabView: View {
     @State private var selectedTab = 0
-    @State private var showingMenu = false
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -45,37 +49,23 @@ struct MainTabView: View {
                 }
                 .tag(2)
             
-            MenuView()
-                .tabItem {
-                    Label("Menu", systemImage: "line.3.horizontal")
-                }
-                .tag(3)
+            NavigationView {
+                MessagesView()
+            }
+            .tabItem {
+                Label("Messages", systemImage: "message.fill")
+            }
+            .tag(3)
+            
+            NavigationView {
+                ProfileView()
+            }
+            .tabItem {
+                Label("Profile", systemImage: "person.fill")
+            }
+            .tag(4)
         }
         .accentColor(.purple)
-    }
-}
-
-struct MenuView: View {
-    var body: some View {
-        NavigationView {
-            List {
-                NavigationLink(destination: MessagesView()) {
-                    Label("Messages", systemImage: "message.fill")
-                        .font(.body)
-                }
-                
-                NavigationLink(destination: MindfulnessView()) {
-                    Label("Mindfulness", systemImage: "leaf.fill")
-                        .font(.body)
-                }
-                
-                NavigationLink(destination: ProfileView()) {
-                    Label("Profile", systemImage: "person.fill")
-                        .font(.body)
-                }
-            }
-            .navigationTitle("More")
-        }
     }
 }
 
@@ -83,4 +73,6 @@ struct MenuView: View {
     ContentView()
         .environmentObject(AuthenticationManager())
         .environmentObject(ThoughtManager())
+        .environmentObject(MilestoneManager())
+        .environmentObject(MoodManager())
 }

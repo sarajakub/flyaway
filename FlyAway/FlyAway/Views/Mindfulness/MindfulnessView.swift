@@ -18,43 +18,43 @@ struct MindfulnessView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            FilterChip(title: "All", isSelected: selectedType == nil) {
-                                selectedType = nil
-                            }
-                            
-                            ForEach(MindfulnessResource.ResourceType.allCases, id: \.self) { type in
-                                FilterChip(
-                                    title: type.rawValue,
-                                    icon: type.icon,
-                                    isSelected: selectedType == type
-                                ) {
-                                    selectedType = type
-                                }
-                            }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        FilterChip(title: "All", isSelected: selectedType == nil) {
+                            selectedType = nil
                         }
-                        .padding(.horizontal)
-                    }
-                    
-                    LazyVGrid(columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ], spacing: 16) {
-                        ForEach(filteredResources) { resource in
-                            NavigationLink(destination: MindfulnessDetailView(resource: resource)) {
-                                ResourceCard(resource: resource)
+
+                        ForEach(MindfulnessResource.ResourceType.allCases, id: \.self) { type in
+                            FilterChip(
+                                title: type.rawValue,
+                                icon: type.icon,
+                                isSelected: selectedType == type
+                            ) {
+                                selectedType = selectedType == type ? nil : type
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .padding(.horizontal)
                 }
-                .padding(.vertical)
+
+                LazyVGrid(columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ], spacing: 16) {
+                    ForEach(filteredResources) { resource in
+                        NavigationLink(destination: MindfulnessDetailView(resource: resource)) {
+                            ResourceCard(resource: resource)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.horizontal)
             }
-            .navigationTitle("Mindfulness")
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(.vertical)
         }
+        .navigationTitle("Mindfulness")
+        .navigationBarTitleDisplayMode(.inline)
+    }
     
     var filteredResources: [MindfulnessResource] {
         if let type = selectedType {

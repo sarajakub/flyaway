@@ -1,27 +1,69 @@
 # FlyAway - Healing Journey App
 
-A mindful iOS app for emotional healing and personal growth. Write or vocalize thoughts, send them into the ether, or hold onto them. Connect with others on their healing journey.
+A mindful iOS app for emotional healing and personal growth. Write your thoughts, track your emotions, and connect with others on their healing journey through supportive community features.
+
+## Screenshots
 
 <div align="center">
   <img width="240" height="524" alt="create-thought-020525" src="https://github.com/user-attachments/assets/da0a210b-3702-4cb4-90d7-31e4c4111b82">
   <br>
-  <sub>Thought Creation Page</sub>
+  <sub>Create and release your thoughts with customizable categories and expiration options</sub>
 </div>
 
 ## Features
 
-### 🌟 Core Features
-- **Thought Creation**: Write or vocalize your thoughts
-- **Send to Ether**: Release thoughts immediately into the void
-- **Temporary Storage**: Keep thoughts for a set period (1, 7, 30, or 90 days)
-- **Permanent Storage**: Save thoughts indefinitely
-- **Public/Private**: Control visibility of your thoughts
+### 💭 Thought Expression
+- **Write or Vocalize**: Express your thoughts through text or voice
+- **Anonymous Posting**: Share publicly while maintaining privacy
+- **Categorization**: Organize by Breakup, Grief, Anxiety, Healing, Gratitude, Reflection
+- **Flexible Storage Options**:
+  - Send to Ether (disappear immediately)
+  - Temporary (1, 7, 30, or 90 days)
+  - Permanent (keep forever)
+  - Public or private visibility
 
-### 👥 Community
-- **Public Feed**: Browse public thoughts from others
-- **Save Thoughts**: Bookmark thoughts that resonate with you
-- **Follow Journeys**: Follow others' healing paths
-- **Categories**: Breakup, Grief, Anxiety, Healing, Gratitude, Reflection
+### 🌱 Emotion Tracking
+- **Daily Mood Check-in**: Track how you're feeling with a 5-point scale (😢 😔 😐 🙂 😊)
+- **Contextual Notes**: Add notes to explain your emotional state
+- **Visual Analytics**: 
+  - Line graph showing mood trends over time
+  - Period selector (Week, Month, 3 Months, Year)
+  - Average mood calculation
+  - Trend analysis (Improving/Declining/Stable)
+- **History View**: Review past check-ins with your notes
+
+### 👥 Community Support
+- **Public Feed**: Browse thoughts from others on similar healing journeys
+- **Smart Sorting**:
+  - Recent: Latest thoughts first
+  - Most Saved: Popular thoughts
+  - For You: Personalized based on your active categories
+- **Supportive Reactions**: Respond with healing-themed emojis
+  - 💜 Support
+  - 🌟 Inspiring
+  - 🕊️ Peaceful
+  - 🌱 Growth
+- **Save Thoughts**: Bookmark meaningful thoughts for later
+- **Category Filtering**: Focus on specific topics
+
+### 📊 My Journey Analytics
+- **Activity Dashboard**: Track your healing progress
+  - Total thoughts created
+  - Period-based statistics (Week/Month/Year/All Time)
+  - Created, deleted, and expired thought counts
+  - Active thought count
+- **Daily Activity Visualization**: Bar chart showing thought creation patterns
+- **Category Breakdown**: See which topics you engage with most
+- **Milestone Tracking**: Mark important dates and track days since events
+
+### 🆘 Help & Support
+- **Crisis Resources**: 
+  - 988 Suicide & Crisis Lifeline (call/text)
+  - Crisis Text Line (text HOME to 741741)
+  - SAMHSA National Helpline
+- **How-To Guides**: Learn to use all features
+- **Privacy & Safety**: Information about data protection
+- **Feedback System**: Submit suggestions and report issues
 
 ### 🧘 Mindfulness Resources
 - **Meditation**: Guided meditations for healing
@@ -29,13 +71,24 @@ A mindful iOS app for emotional healing and personal growth. Write or vocalize t
 - **Journaling**: Prompts and guidance
 - **Affirmations**: Positive affirmations for healing
 
+## Design Philosophy
+
+FlyAway is designed as a **healing tool, not a social network**. Features focus on:
+- ✅ Personal growth and emotional processing
+- ✅ Supportive community without comparison
+- ✅ Mindful expression and reflection
+- ❌ No follower counts or vanity metrics
+- ❌ No endless scrolling or engagement optimization
+- ❌ No productivity pressure (habits, streaks, checklists)
+
 ## Tech Stack
 
 - **SwiftUI**: Modern declarative UI framework
 - **Firebase**: Backend services
   - Authentication: User management
-  - Firestore: Database
+  - Firestore: Database (thoughts, moods, milestones, reactions)
   - Storage: Audio files
+- **Charts**: Native SwiftUI charts for mood visualization
 - **AVFoundation**: Audio recording and playback
 
 ## Setup

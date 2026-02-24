@@ -94,3 +94,7 @@ GoogleService-Info.plist
 
 # macOS
 .DS_Store
+
+# Project documentation (local only)
+COGNITIVE_LOAD_ANALYSIS.md
+FEATURE_RECOMMENDATIONS.md

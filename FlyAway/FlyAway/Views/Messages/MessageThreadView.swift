@@ -5,14 +5,20 @@ struct MessageThreadView: View {
     @ObservedObject var messageManager: MessageManager
     @State private var newMessageText = ""
     @State private var showingDeleteAlert = false
+    @State private var messages: [Message] = []
+    @FocusState private var isMessageFieldFocused: Bool
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    ForEach(thread.messages) { message in
-                        MessageBubble(message: message)
+                    ForEach(groupedMessages, id: \.date) { group in
+                        DateHeaderView(date: group.date)
+                        
+                        ForEach(group.messages) { message in
+                            MessageBubble(message: message)
+                        }
                     }
                 }
                 .padding()
@@ -27,6 +33,13 @@ struct MessageThreadView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(20)
                     .lineLimit(1...5)
+                    .focused($isMessageFieldFocused)
+                    .submitLabel(.send)
+                    .onSubmit {
+                        if !newMessageText.isEmpty {
+                            sendMessage()
+                        }
+                    }
                 
                 Button(action: sendMessage) {
                     Image(systemName: "paperplane.fill")
@@ -53,26 +66,59 @@ struct MessageThreadView: View {
                 }
             }
         }
-        .alert("Delete Conversation", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) {}
+        .task {
+            await refreshMessages()
+        }
+        .confirmationDialog("Delete Conversation", isPresented: $showingDeleteAlert) {
             Button("Delete", role: .destructive) {
                 Task {
                     await messageManager.deleteThread(recipientName: thread.recipientName)
                     dismiss()
                 }
             }
+            Button("Cancel", role: .cancel) { }
         } message: {
-            Text("Are you sure you want to delete all messages with \(thread.recipientName)?")
+            Text("Delete all messages with \(thread.recipientName)?")
         }
     }
     
     private func sendMessage() {
         guard !newMessageText.isEmpty else { return }
         
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+        
         Task {
             await messageManager.sendMessage(to: thread.recipientName, content: newMessageText)
             newMessageText = ""
+            await refreshMessages()
         }
+    }
+    
+    private func refreshMessages() async {
+        await messageManager.fetchMessages()
+        messages = messageManager.messageThreads.first(where: { $0.recipientName == thread.recipientName })?.messages ?? []
+    }
+    
+    // Group messages by day like iMessage
+    var groupedMessages: [(date: Date, messages: [Message])] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: messages) { message in
+            calendar.startOfDay(for: message.createdAt)
+        }
+        
+        return grouped.sorted { $0.key < $1.key }.map { (date: $0.key, messages: $0.value.sorted { $0.createdAt < $1.createdAt }) }
+    }
+}
+
+struct DateHeaderView: View {
+    let date: Date
+    
+    var body: some View {
+        Text(date, style: .date)
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .padding(.vertical, 8)
     }
 }
 

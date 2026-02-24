@@ -40,22 +40,46 @@ struct AuthenticationView: View {
                 
                 VStack(spacing: 20) {
                     if isSignUp {
-                        TextField("Display Name", text: $displayName)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Display Name")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.9))
+                            TextField("Your name", text: $displayName)
+                                .textFieldStyle(RoundedTextFieldStyle())
+                        }
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Email")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white.opacity(0.9))
+                        TextField("you@example.com", text: $email)
+                            .textFieldStyle(RoundedTextFieldStyle())
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Password")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white.opacity(0.9))
+                        SecureField("At least 6 characters", text: $password)
                             .textFieldStyle(RoundedTextFieldStyle())
                     }
                     
-                    TextField("Email", text: $email)
-                        .textFieldStyle(RoundedTextFieldStyle())
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    
-                    SecureField("Password", text: $password)
-                        .textFieldStyle(RoundedTextFieldStyle())
-                    
                     if isSignUp {
-                        SecureField("Confirm Password", text: $confirmPassword)
-                            .textFieldStyle(RoundedTextFieldStyle())
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Confirm Password")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.9))
+                            SecureField("Re-enter your password", text: $confirmPassword)
+                                .textFieldStyle(RoundedTextFieldStyle())
+                        }
                     }
                     
                     Button(action: authenticate) {
@@ -251,8 +275,10 @@ struct RoundedTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .padding()
-            .background(Color.white.opacity(0.9))
+            .foregroundColor(.black)
+            .background(Color.white.opacity(0.95))
             .cornerRadius(12)
+            .accentColor(.purple)
     }
 }
 

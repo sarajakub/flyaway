@@ -11,19 +11,27 @@ struct MessagesView: View {
             } else if messageManager.messageThreads.isEmpty {
                 EmptyMessagesView(showingNewMessage: $showingNewMessage)
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(messageManager.messageThreads) { thread in
-                            NavigationLink(
-                                destination: MessageThreadView(thread: thread, messageManager: messageManager)
-                            ) {
-                                MessageThreadCard(thread: thread)
+                List {
+                    ForEach(messageManager.messageThreads) { thread in
+                        NavigationLink(
+                            destination: MessageThreadView(thread: thread, messageManager: messageManager)
+                        ) {
+                            MessageThreadCard(thread: thread)
+                        }
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                Task {
+                                    await messageManager.deleteThread(recipientName: thread.recipientName)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
                     }
-                    .padding()
                 }
+                .listStyle(.plain)
             }
         }
         .navigationTitle("Messages")

@@ -12,6 +12,8 @@ import FirebaseCore
 struct FlyAwayApp: App {
     @StateObject private var authManager = AuthenticationManager()
     @StateObject private var thoughtManager = ThoughtManager()
+    @StateObject private var milestoneManager = MilestoneManager()
+    @StateObject private var moodManager = MoodManager()
     
     init() {
         FirebaseApp.configure()
@@ -22,6 +24,8 @@ struct FlyAwayApp: App {
             ContentView()
                 .environmentObject(authManager)
                 .environmentObject(thoughtManager)
+                .environmentObject(milestoneManager)
+                .environmentObject(moodManager)
         }
     }
 }

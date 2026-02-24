@@ -14,6 +14,7 @@ struct Thought: Identifiable, Codable {
     var tags: [String]
     var saveCount: Int
     var category: ThoughtCategory
+    var reactionCounts: [String: Int] // "heart": 5, "sparkle": 3, etc.
     
     enum ThoughtCategory: String, Codable, CaseIterable {
         case breakup = "Breakup"

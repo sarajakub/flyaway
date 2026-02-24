@@ -63,11 +63,16 @@ struct ThoughtCard: View {
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         .confirmationDialog("Delete this thought?", isPresented: $showDeleteConfirmation) {
             Button("Delete", role: .destructive) {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.warning)
+                
                 Task {
                     await thoughtManager.deleteThought(thought)
                 }
             }
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This action cannot be undone.")
         }
     }
     
@@ -101,7 +106,8 @@ struct ThoughtCard: View {
         audioURL: nil,
         tags: [],
         saveCount: 5,
-        category: .healing
+        category: .healing,
+        reactionCounts: [:]
     ))
     .environmentObject(ThoughtManager())
     .padding()
