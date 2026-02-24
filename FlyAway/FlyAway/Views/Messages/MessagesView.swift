@@ -132,15 +132,9 @@ struct MessageThreadCard: View {
             
             Spacer()
             
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(thread.lastMessageDate, style: .relative)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            Text(thread.lastMessageDate, style: .relative)
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .padding()
         .background(Color(.systemBackground))
