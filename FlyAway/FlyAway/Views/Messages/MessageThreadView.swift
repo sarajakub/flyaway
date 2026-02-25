@@ -220,7 +220,8 @@ struct VoiceBubble: View {
             guard let urlString = audioURL, let url = URL(string: urlString) else { return }
             URLSession.shared.dataTask(with: url) { data, _, error in
                 guard let data = data, error == nil else {
-                    print("❌ Voice message download error: \(error?.localizedDescription ?? \"unknown\")")
+                    let msg = error?.localizedDescription ?? "unknown"
+                    print("❌ Voice message download error: \(msg)")
                     return
                 }
                 DispatchQueue.main.async {
