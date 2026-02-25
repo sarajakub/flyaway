@@ -57,20 +57,36 @@ class MessageManager: ObservableObject {
         }
         print("🎙 Uploading voice message: \(localURL.lastPathComponent) (\(fileSize) bytes)")
 
-        do {
-            // Upload directly from file URL
-            let voiceRef = Storage.storage().reference()
-                .child("voiceMessages/\(userId)/\(UUID().uuidString).m4a")
-            let metadata = StorageMetadata()
-            metadata.contentType = "audio/mp4"
-            _ = try await voiceRef.putFileAsync(from: localURL, metadata: metadata)
-            // Store the storage PATH (not a download URL) so playback works under
-            // standard auth rules (allow read, write: if request.auth != null)
-            // without needing public access or special download tokens.
-            let storagePath = voiceRef.fullPath
-            print("✅ Voice uploaded to path: \(storagePath)")
+        let voiceRef = Storage.storage().reference()
+            .child("voiceMessages/\(userId)/\(UUID().uuidString).m4a")
+        let metadata = StorageMetadata()
+        metadata.contentType = "audio/mp4"
 
-            // Save Firestore message record
+        // Step 1: Upload — use callback API wrapped in a continuation.
+        // putFileAsync has a known bug in some Firebase SDK versions where it
+        // internally calls getMetadata() after the upload completes, causing a
+        // spurious "Object does not exist" error even when the upload succeeded.
+        // The callback-based putFile avoids this entirely.
+        do {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                voiceRef.putFile(from: localURL, metadata: metadata) { _, error in
+                    if let error = error {
+                        print("❌ Storage upload failed: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    } else {
+                        print("✅ Voice uploaded to: \(voiceRef.fullPath)")
+                        continuation.resume()
+                    }
+                }
+            }
+        } catch {
+            await MainActor.run { self.errorMessage = "Upload failed: \(error.localizedDescription)" }
+            return
+        }
+
+        // Step 2: Save the Firestore message record using the storage path.
+        let storagePath = voiceRef.fullPath
+        do {
             let message = Message(
                 userId: userId,
                 recipientName: recipientName,
@@ -81,15 +97,15 @@ class MessageManager: ObservableObject {
                 audioURL: storagePath
             )
             _ = try db.collection("messages").addDocument(from: message)
-            print("✅ Voice message saved")
-            await fetchMessages()
-
-            // Clean up temp file
-            try? FileManager.default.removeItem(at: localURL)
+            print("✅ Voice message saved to Firestore")
         } catch {
-            print("❌ Error sending voice message: \(error.localizedDescription)")
-            await MainActor.run { self.errorMessage = error.localizedDescription }
+            print("❌ Firestore save failed: \(error.localizedDescription)")
+            await MainActor.run { self.errorMessage = "Could not save message: \(error.localizedDescription)" }
+            return
         }
+
+        await fetchMessages()
+        try? FileManager.default.removeItem(at: localURL)
     }
 
     func fetchMessages() async {
