@@ -13,24 +13,28 @@ class MoodManager: ObservableObject {
     
     func checkTodayMood() async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-        
+
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? Date()
-        
+
         do {
-            // Get recent entries and filter client-side to avoid composite index
+            // Limit to 10 most recent entries — at one per day max this is
+            // always enough to find today's without loading the entire history.
+            // Avoids a composite index (userId + createdAt) by filtering client-side
+            // on the small bounded result set.
             let snapshot = try await db.collection("moodEntries")
                 .whereField("userId", isEqualTo: userId)
+                .limit(to: 10)
                 .getDocuments()
-            
+
             await MainActor.run {
                 let entries = snapshot.documents.compactMap { doc -> MoodEntry? in
                     try? doc.data(as: MoodEntry.self)
                 }
                 .filter { $0.createdAt >= startOfDay && $0.createdAt < endOfDay }
                 .sorted { $0.createdAt > $1.createdAt }
-                
+
                 self.todayMood = entries.first
             }
         } catch {
@@ -40,9 +44,12 @@ class MoodManager: ObservableObject {
     
     func saveMood(mood: Int, note: String?) async {
         guard let userId = Auth.auth().currentUser?.uid else {
-            await MainActor.run {
-                self.errorMessage = "User not authenticated"
-            }
+            await MainActor.run { self.errorMessage = "User not authenticated" }
+            return
+        }
+        // Validate range — guards against any accidental UI bugs sending out-of-range values
+        guard (1...5).contains(mood) else {
+            await MainActor.run { self.errorMessage = "Invalid mood value" }
             return
         }
         

@@ -8,6 +8,7 @@ struct DailyMoodCheckIn: View {
     @State private var showNoteInput = false
     @State private var noteText = ""
     @FocusState private var isNoteFocused: Bool
+    @State private var isSaving = false
     
     let moods: [(emoji: String, label: String, value: Int)] = [
         ("😢", "Very Bad", 1),
@@ -169,11 +170,10 @@ struct DailyMoodCheckIn: View {
     }
     
     private func saveMood() async {
-        guard let mood = selectedMood else { return }
-        
+        guard let mood = selectedMood, !isSaving else { return }
+        isSaving = true
         let note = noteText.isEmpty ? nil : noteText
         await moodManager.saveMood(mood: mood, note: note)
-        
         await MainActor.run {
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)

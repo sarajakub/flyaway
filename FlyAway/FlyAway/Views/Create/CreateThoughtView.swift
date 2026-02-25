@@ -179,7 +179,7 @@ struct CreateThoughtView: View {
             }
         }
         .alert("Error", isPresented: $showingError) {
-            Button("OK") { }
+            Button("OK") { thoughtManager.errorMessage = nil }
         } message: {
             Text(thoughtManager.errorMessage ?? "Failed to save thought")
         }

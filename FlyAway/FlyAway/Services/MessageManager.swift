@@ -165,7 +165,15 @@ class MessageManager: ObservableObject {
                 .whereField("recipientName", isEqualTo: recipientName)
                 .getDocuments()
 
-            // Delete Storage files for any voice messages before removing Firestore docs
+            // Delete Firestore docs first — they are the source of truth.
+            // Storage cleanup is best-effort after; an orphaned .m4a is a minor
+            // cost issue, while a dangling Firestore record pointing to a deleted
+            // Storage file causes a broken UI for the user.
+            for document in snapshot.documents {
+                try await document.reference.delete()
+            }
+
+            // Clean up Storage files (best effort — don't throw on failure)
             for document in snapshot.documents {
                 if let msg = try? document.data(as: Message.self),
                    msg.isVoice,
@@ -174,10 +182,6 @@ class MessageManager: ObservableObject {
                     try? await Storage.storage().reference(withPath: path).delete()
                     print("🗑 Deleted Storage file: \(path)")
                 }
-            }
-
-            for document in snapshot.documents {
-                try await document.reference.delete()
             }
 
             await fetchMessages()
@@ -191,19 +195,19 @@ class MessageManager: ObservableObject {
     func deleteMessage(_ message: Message) async {
         guard let docId = message.id else { return }
 
-        // Delete Storage file if this is a voice message
+        // Delete Firestore record first, then Storage (same reasoning as deleteThread)
+        do {
+            try await db.collection("messages").document(docId).delete()
+        } catch {
+            await MainActor.run { self.errorMessage = error.localizedDescription }
+            return
+        }
+
         if message.isVoice, let path = message.audioURL, !path.hasPrefix("https://") {
             try? await Storage.storage().reference(withPath: path).delete()
             print("🗑 Deleted Storage file: \(path)")
         }
 
-        do {
-            try await db.collection("messages").document(docId).delete()
-            await fetchMessages()
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-            }
-        }
+        await fetchMessages()
     }
 }

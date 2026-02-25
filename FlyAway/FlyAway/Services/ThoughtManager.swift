@@ -31,7 +31,14 @@ class ThoughtManager: ObservableObject {
             return
         }
         
-        // Use anonymous or actual username based on toggle
+        // Validate content before hitting Firestore
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            await MainActor.run { self.errorMessage = "Thought cannot be empty" }
+            return
+        }
+        let safeContent = String(trimmed.prefix(2000)) // hard cap at 2000 chars
+
         let userName: String
         if postAsAnonymous {
             userName = "Anonymous"
@@ -51,7 +58,7 @@ class ThoughtManager: ObservableObject {
         let thought = Thought(
             userId: userId,
             userName: userName,
-            content: content,
+            content: safeContent,
             isPublic: isPublic,
             createdAt: Date(),
             expiresAt: expiresAt,
