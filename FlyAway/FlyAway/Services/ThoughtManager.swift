@@ -20,6 +20,9 @@ class ThoughtManager: ObservableObject {
         keepForDays: Int?,
         postAsAnonymous: Bool = true
     ) async {
+        // Clear any stale error from previous operations before starting
+        await MainActor.run { self.errorMessage = nil }
+
         guard let userId = Auth.auth().currentUser?.uid else {
             await MainActor.run {
                 self.errorMessage = "User not authenticated"

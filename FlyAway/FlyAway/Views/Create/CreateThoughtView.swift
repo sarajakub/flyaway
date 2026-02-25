@@ -11,6 +11,7 @@ struct CreateThoughtView: View {
     @State private var keepForDays: Int?
     @State private var showingSuccess = false
     @State private var showingError = false
+    @State private var isSaving = false
     @FocusState private var isTextFieldFocused: Bool
     
     @EnvironmentObject var thoughtManager: ThoughtManager
@@ -118,25 +119,40 @@ struct CreateThoughtView: View {
                 .cornerRadius(12)
                 
                 Button(action: createThought) {
-                    HStack {
-                        Image(systemName: sendToEther ? "paperplane.fill" : "square.and.arrow.up")
-                        Text(sendToEther ? "Release to Ether" : "Share Thought")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.purple, Color.blue],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                    if isSaving {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.purple, Color.blue],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(12)
+                    } else {
+                        HStack {
+                            Image(systemName: sendToEther ? "paperplane.fill" : "square.and.arrow.up")
+                            Text(sendToEther ? "Release to Ether" : "Share Thought")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.purple, Color.blue],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .cornerRadius(12)
+                        .cornerRadius(12)
+                    }
                 }
-                .disabled(thoughtText.isEmpty)
-                .opacity(thoughtText.isEmpty ? 0.6 : 1.0)
+                .disabled(thoughtText.isEmpty || isSaving)
+                .opacity((thoughtText.isEmpty || isSaving) ? 0.6 : 1.0)
             }
             .padding()
         }
@@ -170,6 +186,8 @@ struct CreateThoughtView: View {
     }
     
     private func createThought() {
+        guard !isSaving else { return }
+        isSaving = true
         Task {
             await thoughtManager.createThought(
                 content: thoughtText,
@@ -179,8 +197,9 @@ struct CreateThoughtView: View {
                 keepForDays: keepForDays,
                 postAsAnonymous: postAsAnonymous
             )
-            
+
             await MainActor.run {
+                isSaving = false
                 if thoughtManager.errorMessage != nil {
                     showingError = true
                 } else {

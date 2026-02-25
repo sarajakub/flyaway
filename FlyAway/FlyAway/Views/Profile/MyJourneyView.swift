@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct MyJourneyView: View {
     @EnvironmentObject var thoughtManager: ThoughtManager
@@ -94,83 +95,106 @@ struct MyJourneyView: View {
                 }
                 .padding(.horizontal)
                 
-                // Daily Activity Chart
-                if !dailyActivityData.isEmpty {
+                // Activity Line Chart
+                VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Thoughts Written")
+                            .font(.headline)
+                        Text("Each thought shared, released, or sent to ether")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal)
+
+                    Chart(dailyActivityData, id: \.date) { item in
+                        AreaMark(
+                            x: .value("Date", item.date),
+                            y: .value("Thoughts", item.count)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.purple.opacity(0.35), Color.purple.opacity(0.0)],
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        )
+                        .interpolationMethod(.catmullRom)
+
+                        LineMark(
+                            x: .value("Date", item.date),
+                            y: .value("Thoughts", item.count)
+                        )
+                        .foregroundStyle(Color.purple)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5))
+                        .interpolationMethod(.catmullRom)
+
+                        PointMark(
+                            x: .value("Date", item.date),
+                            y: .value("Thoughts", item.count)
+                        )
+                        .foregroundStyle(Color.purple)
+                        .symbolSize(item.count > 0 ? 40 : 0)
+                    }
+                    .chartXAxis {
+                        AxisMarks(values: xAxisValues) { value in
+                            AxisGridLine()
+                            AxisValueLabel(format: xAxisFormat)
+                        }
+                    }
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { value in
+                            AxisGridLine()
+                            AxisValueLabel()
+                        }
+                    }
+                    .frame(height: 180)
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+                }
+                
+                // Category Donut Chart
+                if !categoryBreakdown.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Activity Over Time")
+                        Text("Categories (All Time)")
                             .font(.headline)
                             .padding(.horizontal)
-                        
-                        VStack(spacing: 8) {
-                            ForEach(dailyActivityData.reversed(), id: \.date) { data in
-                                HStack(spacing: 12) {
-                                    Text(data.date, style: .date)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 80, alignment: .leading)
-                                    
-                                    ZStack(alignment: .leading) {
-                                        Rectangle()
-                                            .fill(Color.gray.opacity(0.1))
-                                            .frame(height: 20)
-                                            .cornerRadius(4)
-                                        
-                                        if data.count > 0 {
-                                            Rectangle()
-                                                .fill(Color.purple)
-                                                .frame(width: barWidth(for: data.count), height: 20)
-                                                .cornerRadius(4)
-                                        }
+
+                        HStack(alignment: .center, spacing: 16) {
+                            // Donut chart
+                            Chart(categoryBreakdown, id: \.category) { item in
+                                SectorMark(
+                                    angle: .value("Count", item.count),
+                                    innerRadius: .ratio(0.52),
+                                    angularInset: 1.5
+                                )
+                                .foregroundStyle(categoryColor(item.category))
+                                .cornerRadius(4)
+                            }
+                            .frame(width: 140, height: 140)
+
+                            // Legend
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(categoryBreakdown, id: \.category) { item in
+                                    HStack(spacing: 8) {
+                                        Circle()
+                                            .fill(categoryColor(item.category))
+                                            .frame(width: 10, height: 10)
+                                        Text(item.category.emoji + " " + item.category.rawValue)
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                        Spacer()
+                                        Text("\(item.percentage)%")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.secondary)
                                     }
-                                    
-                                    Text("\(data.count)")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.purple)
-                                        .frame(width: 30, alignment: .trailing)
                                 }
                             }
                         }
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(12)
-                        .padding(.horizontal)
-                    }
-                }
-                
-                // Category Breakdown
-                if !categoryBreakdown.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Categories (All Time)")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        VStack(spacing: 12) {
-                            ForEach(categoryBreakdown, id: \.category) { item in
-                                HStack {
-                                    Text(item.category.emoji)
-                                        .font(.title3)
-                                    
-                                    Text(item.category.rawValue)
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(item.count)")
-                                        .font(.title3)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.purple)
-                                    
-                                    Text("(\(item.percentage)%)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
-                            }
-                        }
                         .padding(.horizontal)
                     }
                 }
@@ -313,7 +337,7 @@ struct MyJourneyView: View {
                 }
             }
         } else {
-            for dayOffset in (0..<min(daysToShow, 14)).reversed() {
+            for dayOffset in (0..<daysToShow).reversed() {
                 if let day = calendar.date(byAdding: .day, value: -dayOffset, to: now) {
                     let startOfDay = calendar.startOfDay(for: day)
                     let count = dateCounts[startOfDay] ?? 0
@@ -325,15 +349,31 @@ struct MyJourneyView: View {
         return data
     }
     
-    func barWidth(for count: Int) -> CGFloat {
-        guard let maxCount = dailyActivityData.max(by: { $0.count < $1.count })?.count, maxCount > 0 else {
-            return 0
-        }
-        
-        let maxWidth: CGFloat = 200
-        return (CGFloat(count) / CGFloat(maxCount)) * maxWidth
+    // Category chart helpers
+    func categoryColor(_ category: Thought.ThoughtCategory) -> Color {
+        let colors: [Color] = [.purple, .blue, .teal, .green, .orange, .pink, .indigo, .cyan]
+        let index = (Thought.ThoughtCategory.allCases.firstIndex(of: category) ?? 0) % colors.count
+        return colors[index]
     }
-    
+
+    var xAxisValues: [Date] {
+        switch selectedPeriod {
+        case .week:    return Array(stride(from: 0, through: 6, by: 1).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) }.reversed())
+        case .month:   return Array(stride(from: 0, through: 29, by: 6).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) }.reversed())
+        case .year:    return Array(stride(from: 0, through: 11, by: 2).compactMap { Calendar.current.date(byAdding: .month, value: -$0, to: Date()) }.reversed())
+        case .allTime: return dailyActivityData.map(\.date)
+        }
+    }
+
+    var xAxisFormat: Date.FormatStyle {
+        switch selectedPeriod {
+        case .week:    return .dateTime.weekday(.abbreviated)
+        case .month:   return .dateTime.month(.abbreviated).day()
+        case .year:    return .dateTime.month(.abbreviated)
+        case .allTime: return .dateTime.month(.abbreviated).year(.twoDigits)
+        }
+    }
+
     var categoryBreakdown: [(category: Thought.ThoughtCategory, count: Int, percentage: Int)] {
         let allCreated = thoughtManager.thoughtActivities.filter { $0.activityType == .created }
         guard !allCreated.isEmpty else { return [] }
