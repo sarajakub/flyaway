@@ -31,6 +31,7 @@ struct MessageThreadView: View {
                 }
                 .padding()
             }
+            .defaultScrollAnchor(.bottom)
             
             Divider()
 
