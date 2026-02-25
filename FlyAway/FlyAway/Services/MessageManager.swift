@@ -58,14 +58,17 @@ class MessageManager: ObservableObject {
         print("🎙 Uploading voice message: \(localURL.lastPathComponent) (\(fileSize) bytes)")
 
         do {
-            // Upload directly from file URL — more reliable than loading into Data
+            // Upload directly from file URL
             let voiceRef = Storage.storage().reference()
                 .child("voiceMessages/\(userId)/\(UUID().uuidString).m4a")
             let metadata = StorageMetadata()
             metadata.contentType = "audio/mp4"
             _ = try await voiceRef.putFileAsync(from: localURL, metadata: metadata)
-            let downloadURL = try await voiceRef.downloadURL()
-            print("✅ Voice uploaded to: \(downloadURL)")
+            // Store the storage PATH (not a download URL) so playback works under
+            // standard auth rules (allow read, write: if request.auth != null)
+            // without needing public access or special download tokens.
+            let storagePath = voiceRef.fullPath
+            print("✅ Voice uploaded to path: \(storagePath)")
 
             // Save Firestore message record
             let message = Message(
@@ -75,7 +78,7 @@ class MessageManager: ObservableObject {
                 createdAt: Date(),
                 isRead: false,
                 isVoice: true,
-                audioURL: downloadURL.absoluteString
+                audioURL: storagePath
             )
             _ = try db.collection("messages").addDocument(from: message)
             print("✅ Voice message saved")

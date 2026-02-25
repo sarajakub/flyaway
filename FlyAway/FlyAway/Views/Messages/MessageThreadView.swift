@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import FirebaseStorage
 
 struct MessageThreadView: View {
     let thread: MessageThread
@@ -145,14 +146,11 @@ struct DateHeaderView: View {
 struct MessageBubble: View {
     let message: Message
 
-    @State private var player: AVAudioPlayer?
-    @State private var isPlaying = false
-
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 if message.isVoice {
-                    VoiceBubble(audioURL: message.audioURL, player: $player, isPlaying: $isPlaying)
+                    VoiceBubble(audioPath: message.audioURL)
                 } else {
                     Text(message.content)
                         .font(.body)
@@ -167,80 +165,200 @@ struct MessageBubble: View {
                         )
                         .cornerRadius(20)
                 }
-
                 Text(message.createdAt, style: .time)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
             }
-
             Spacer()
         }
     }
 }
 
+// MARK: - iMessage-style Voice Bubble
+
 struct VoiceBubble: View {
-    let audioURL: String?
-    @Binding var player: AVAudioPlayer?
-    @Binding var isPlaying: Bool
+    /// Firebase Storage path (e.g. "voiceMessages/uid/abc.m4a")
+    /// or a legacy https:// download URL for messages recorded before this fix.
+    let audioPath: String?
+
+    @State private var player: AVAudioPlayer?
+    @State private var isPlaying = false
+    @State private var isLoading = false
+    @State private var progress: Double = 0          // 0...1
+    @State private var duration: TimeInterval = 0
+    @State private var progressTimer: Timer?
 
     var body: some View {
-        Button(action: togglePlayback) {
-            HStack(spacing: 10) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.body.weight(.semibold))
-                    .foregroundColor(.white)
-
-                Image(systemName: "waveform")
-                    .font(.title3)
-                    .foregroundColor(.white.opacity(0.85))
-
-                Text("Voice message")
-                    .font(.callout)
-                    .foregroundColor(.white)
+        HStack(spacing: 10) {
+            // Play / pause / loading button
+            Button(action: togglePlayback) {
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.25))
+                        .frame(width: 36, height: 36)
+                    if isLoading {
+                        ProgressView().tint(.white).scaleEffect(0.75)
+                    } else {
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.callout.weight(.bold))
+                            .foregroundColor(.white)
+                    }
+                }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                LinearGradient(
-                    colors: [Color.purple, Color.blue],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+            .disabled(isLoading)
+
+            VStack(alignment: .leading, spacing: 3) {
+                // Waveform
+                WaveformBarsView(
+                    progress: progress,
+                    seed: audioPath ?? "default"
                 )
-            )
-            .cornerRadius(20)
+                .frame(height: 28)
+
+                // Duration / countdown
+                Text(timeString(isPlaying && duration > 0 ? duration * (1 - progress) : duration))
+                    .font(.caption2.monospacedDigit())
+                    .foregroundColor(.white.opacity(0.8))
+            }
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            LinearGradient(
+                colors: [Color.purple, Color.blue],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(20)
+        .onDisappear { stopPlayback() }
     }
+
+    // MARK: - Playback
 
     private func togglePlayback() {
         if isPlaying {
-            player?.pause()
-            isPlaying = false
+            stopPlayback()
+        } else if let existingPlayer = player, existingPlayer.currentTime > 0 {
+            // Resume from paused position
+            existingPlayer.play()
+            isPlaying = true
+            startProgressTimer()
         } else {
-            guard let urlString = audioURL, let url = URL(string: urlString) else { return }
+            loadAndPlay()
+        }
+    }
+
+    private func loadAndPlay() {
+        guard let path = audioPath else { return }
+        isLoading = true
+
+        let resolveAndPlay: (URL) -> Void = { url in
             URLSession.shared.dataTask(with: url) { data, _, error in
-                guard let data = data, error == nil else {
-                    let msg = error?.localizedDescription ?? "unknown"
-                    print("❌ Voice message download error: \(msg)")
-                    return
-                }
                 DispatchQueue.main.async {
+                    guard let data, error == nil else {
+                        isLoading = false
+                        print("❌ Voice download error: \(error?.localizedDescription ?? \"unknown\")")
+                        return
+                    }
                     do {
-                        // Route audio through speaker (not earpiece)
                         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
                         try AVAudioSession.sharedInstance().setActive(true)
-                        let audioPlayer = try AVAudioPlayer(data: data)
-                        player = audioPlayer
-                        audioPlayer.play()
+                        let p = try AVAudioPlayer(data: data)
+                        player = p
+                        duration = p.duration
+                        p.play()
                         isPlaying = true
-                        Timer.scheduledTimer(withTimeInterval: audioPlayer.duration, repeats: false) { _ in
-                            isPlaying = false
-                        }
+                        isLoading = false
+                        startProgressTimer()
                     } catch {
-                        print("❌ Voice message playback error: \(error.localizedDescription)")
+                        isLoading = false
+                        print("❌ Voice playback error: \(error.localizedDescription)")
                     }
                 }
             }.resume()
+        }
+
+        if path.hasPrefix("https://") {
+            // Legacy messages stored with a direct download URL
+            if let url = URL(string: path) { resolveAndPlay(url) }
+            else { isLoading = false }
+        } else {
+            // Current approach: resolve via authenticated Storage SDK
+            Storage.storage().reference(withPath: path).downloadURL { url, error in
+                if let url {
+                    resolveAndPlay(url)
+                } else {
+                    DispatchQueue.main.async {
+                        isLoading = false
+                        print("❌ Storage URL error: \(error?.localizedDescription ?? \"unknown\")")
+                    }
+                }
+            }
+        }
+    }
+
+    private func stopPlayback() {
+        player?.pause()
+        isPlaying = false
+        progressTimer?.invalidate()
+        progressTimer = nil
+    }
+
+    private func startProgressTimer() {
+        progressTimer?.invalidate()
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            guard let p = player else { return }
+            if p.isPlaying {
+                progress = p.duration > 0 ? p.currentTime / p.duration : 0
+            } else {
+                // Finished naturally
+                isPlaying = false
+                progress = 0
+                progressTimer?.invalidate()
+                progressTimer = nil
+            }
+        }
+    }
+
+    private func timeString(_ t: TimeInterval) -> String {
+        let secs = max(0, Int(t))
+        return String(format: "%d:%02d", secs / 60, secs % 60)
+    }
+}
+
+// MARK: - Waveform Bars
+
+struct WaveformBarsView: View {
+    let progress: Double  // 0...1 — bars up to this point are full-white
+    let seed: String       // used for deterministic bar heights per message
+
+    private static let barCount = 30
+
+    /// Generates a deterministic, natural-looking waveform from any seed string.
+    private func barHeights() -> [CGFloat] {
+        var hash = seed.unicodeScalars.reduce(5381) { ($0 << 5) &+ $0 &+ Int($1.value) }
+        return (0..<Self.barCount).map { i in
+            hash = hash &* 1664525 &+ 1013904223
+            let raw = CGFloat(abs(hash) % 100) / 100.0          // 0...1
+            // Blend with a bell-curve envelope so edges are shorter than centre
+            let pos = CGFloat(i) / CGFloat(Self.barCount - 1) - 0.5  // -0.5...0.5
+            let envelope = 1.0 - pos * pos * 2.2
+            return max(0.15, min(1.0, raw * 0.65 + envelope * 0.35))
+        }
+    }
+
+    var body: some View {
+        let heights = barHeights()
+        HStack(spacing: 2) {
+            ForEach(0..<Self.barCount, id: \.self) { i in
+                let filled = Double(i) / Double(Self.barCount) <= progress
+                Capsule()
+                    .fill(filled ? Color.white : Color.white.opacity(0.35))
+                    .frame(width: 2.5, height: heights[i] * 26)
+                    .animation(.linear(duration: 0.04), value: progress)
+            }
         }
     }
 }
