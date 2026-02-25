@@ -259,7 +259,8 @@ struct VoiceBubble: View {
                 DispatchQueue.main.async {
                     guard let data, error == nil else {
                         isLoading = false
-                        print("❌ Voice download error: \(error?.localizedDescription ?? \"unknown\")")
+                        let desc = error?.localizedDescription ?? "unknown"
+                        print("❌ Voice download error: \(desc)")
                         return
                     }
                     do {
@@ -292,7 +293,8 @@ struct VoiceBubble: View {
                 } else {
                     DispatchQueue.main.async {
                         isLoading = false
-                        print("❌ Storage URL error: \(error?.localizedDescription ?? \"unknown\")")
+                        let desc = error?.localizedDescription ?? "unknown"
+                        print("❌ Storage URL error: \(desc)")
                     }
                 }
             }

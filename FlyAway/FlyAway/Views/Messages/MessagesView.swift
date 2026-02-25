@@ -4,6 +4,8 @@ struct MessagesView: View {
     @StateObject private var messageManager = MessageManager()
     @State private var showingNewMessage = false
     @State private var selectedThread: MessageThread?
+    @State private var threadToDelete: MessageThread?
+    @State private var showDeleteConfirmation = false
     
     var body: some View {
         ZStack {
@@ -22,11 +24,10 @@ struct MessagesView: View {
                         .buttonStyle(.plain)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
-                                Task {
-                                    await messageManager.deleteThread(recipientName: thread.recipientName)
-                                }
+                                threadToDelete = thread
+                                showDeleteConfirmation = true
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -62,6 +63,21 @@ struct MessagesView: View {
         }
         .refreshable {
             await messageManager.fetchMessages()
+        }
+        .confirmationDialog(
+            "Delete this conversation?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                guard let thread = threadToDelete else { return }
+                Task { await messageManager.deleteThread(recipientName: thread.recipientName) }
+            }
+            Button("Cancel", role: .cancel) { threadToDelete = nil }
+        } message: {
+            if let name = threadToDelete?.recipientName {
+                Text("Your conversation with \(name) will be permanently deleted.")
+            }
         }
     }
 }

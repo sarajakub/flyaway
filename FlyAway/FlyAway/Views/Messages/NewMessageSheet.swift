@@ -67,6 +67,12 @@ struct NewMessageSheet: View {
                         .focused($focusedField, equals: .message)
                 }
                 .padding(.horizontal)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { focusedField = nil }
+                    }
+                }
                 
                 Button(action: sendMessage) {
                     if isSending {
