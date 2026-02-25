@@ -202,9 +202,6 @@ struct CommunityView: View {
         .task {
             await thoughtManager.fetchPublicThoughts()
         }
-        .refreshable {
-            await thoughtManager.fetchPublicThoughts()
-        }
     }
     
     var filteredThoughts: [Thought] {

@@ -140,6 +140,7 @@ struct CreateThoughtView: View {
             }
             .padding()
         }
+        .scrollDismissesKeyboard(.interactively)
         .onTapGesture {
             isTextFieldFocused = false
         }

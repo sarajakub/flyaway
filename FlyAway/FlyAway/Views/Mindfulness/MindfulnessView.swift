@@ -128,6 +128,7 @@ struct ResourceCard: View {
             }
             .padding(.horizontal, 4)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)

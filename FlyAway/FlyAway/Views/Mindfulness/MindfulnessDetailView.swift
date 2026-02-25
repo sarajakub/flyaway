@@ -1,9 +1,11 @@
 import SwiftUI
+import AVFoundation
 
 // MARK: - Detail view (router)
 
 struct MindfulnessDetailView: View {
     let resource: MindfulnessResource
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ScrollView {
@@ -46,13 +48,13 @@ struct MindfulnessDetailView: View {
                         BreathworkView(inhale: inhale, hold1: hold1, exhale: exhale, hold2: hold2, totalCycles: cycles)
 
                     case .journaling(let prompts):
-                        JournalingView(prompts: prompts)
+                        JournalingView(prompts: prompts, onComplete: { dismiss() })
 
                     case .affirmations(let cards):
                         AffirmationsView(cards: cards)
 
                     case .meditation(let steps):
-                        MeditationView(steps: steps)
+                        MeditationView(steps: steps, onComplete: { dismiss() })
                     }
                 }
                 .padding(.horizontal)
@@ -252,7 +254,9 @@ private struct PatternPill: View {
 
 private struct JournalingView: View {
     let prompts: [String]
+    let onComplete: (() -> Void)?
     @State private var index = 0
+    @StateObject private var speech = SpeechManager()
 
     var body: some View {
         VStack(spacing: 24) {
@@ -267,9 +271,22 @@ private struct JournalingView: View {
 
             // Prompt card
             VStack(spacing: 16) {
-                Text("Prompt \(index + 1) of \(prompts.count)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack {
+                    Text("Prompt \(index + 1) of \(prompts.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button {
+                        if speech.isSpeaking { speech.stop() } else { speech.speak(prompts[index]) }
+                    } label: {
+                        Image(systemName: speech.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.2")
+                            .font(.subheadline)
+                            .foregroundColor(.purple)
+                            .padding(8)
+                            .background(Color.purple.opacity(0.08))
+                            .clipShape(Circle())
+                    }
+                }
 
                 Text(prompts[index])
                     .font(.title3)
@@ -312,7 +329,12 @@ private struct JournalingView: View {
                 .disabled(index == 0)
 
                 Button {
-                    if index < prompts.count - 1 { index += 1 }
+                    speech.stop()
+                    if index < prompts.count - 1 {
+                        index += 1
+                    } else {
+                        onComplete?()
+                    }
                 } label: {
                     HStack(spacing: 6) {
                         Text(index == prompts.count - 1 ? "Done" : "Next")
@@ -329,6 +351,7 @@ private struct JournalingView: View {
             }
         }
         .padding(.vertical, 24)
+        .onDisappear { speech.stop() }
     }
 }
 
@@ -452,96 +475,221 @@ private struct AffirmationsView: View {
 
 private struct MeditationView: View {
     let steps: [String]
+    let onComplete: (() -> Void)?
     @State private var activeStep = 0
+    @State private var autoAdvance = false
+    @StateObject private var speech = SpeechManager()
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
+
+            // Controls row
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(activeStep < steps.count ? "Tap the highlighted step when ready" : "")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "speaker.wave.2")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("", isOn: $autoAdvance)
+                    .labelsHidden()
+                    .toggleStyle(SwitchToggleStyle(tint: .purple))
+                    .scaleEffect(0.8, anchor: .trailing)
+            }
+            .padding(.horizontal, 4)
+
+            // Steps
             VStack(spacing: 14) {
                 ForEach(steps.indices, id: \.self) { i in
-                    HStack(alignment: .top, spacing: 14) {
-                        ZStack {
-                            Circle()
-                                .fill(stepColor(i))
-                                .frame(width: 32, height: 32)
+                    VStack(spacing: 0) {
+                        HStack(alignment: .top, spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(stepColor(i))
+                                    .frame(width: 32, height: 32)
+                                if i < activeStep {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundColor(.white)
+                                } else {
+                                    Text("\(i + 1)")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundColor(i == activeStep ? .white : .secondary)
+                                }
+                            }
 
-                            if i < activeStep {
-                                Image(systemName: "checkmark")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                            } else {
-                                Text("\(i + 1)")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(i == activeStep ? .white : .secondary)
+                            Text(steps[i])
+                                .font(.body)
+                                .foregroundColor(stepTextColor(i))
+                                .lineSpacing(4)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(12)
+                                .background(i == activeStep ? Color.purple.opacity(0.08) : Color.clear)
+                                .cornerRadius(12)
+                                .animation(.easeInOut(duration: 0.3), value: activeStep)
+
+                            // TTS speaker button (visible for active step and completed steps)
+                            if i <= activeStep && activeStep < steps.count {
+                                Button {
+                                    if speech.isSpeaking && speech.speakingIndex == i {
+                                        speech.stop()
+                                    } else {
+                                        speech.speak(steps[i], index: i)
+                                    }
+                                } label: {
+                                    Image(systemName: speech.isSpeaking && speech.speakingIndex == i
+                                          ? "speaker.wave.2.fill" : "speaker.wave.2")
+                                        .font(.caption)
+                                        .foregroundColor(speech.isSpeaking && speech.speakingIndex == i
+                                                         ? .purple : .secondary)
+                                        .padding(6)
+                                        .background(Color.gray.opacity(0.1))
+                                        .clipShape(Circle())
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            guard i == activeStep, activeStep < steps.count else { return }
+                            speech.stop()
+                            withAnimation(.spring()) { activeStep += 1 }
+                            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            if autoAdvance && activeStep < steps.count {
+                                speech.speak(steps[activeStep], index: activeStep)
                             }
                         }
 
-                        Text(steps[i])
-                            .font(.body)
-                            .foregroundColor(stepTextColor(i))
-                            .lineSpacing(4)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(12)
-                            .background(i == activeStep ? Color.purple.opacity(0.08) : Color.clear)
-                            .cornerRadius(12)
-                            .animation(.easeInOut(duration: 0.3), value: activeStep)
-                    }
-                    .padding(.horizontal, 4)
-
-                    if i < steps.count - 1 {
-                        HStack { Color.gray.opacity(0.2).frame(width: 2, height: 16).padding(.leading, 20) ; Spacer() }
+                        if i < steps.count - 1 {
+                            HStack {
+                                Color.gray.opacity(0.2)
+                                    .frame(width: 2, height: 16)
+                                    .padding(.leading, 20)
+                                Spacer()
+                            }
+                        }
                     }
                 }
             }
 
-            if activeStep < steps.count {
-                Button {
-                    withAnimation(.spring()) {
-                        activeStep = min(activeStep + 1, steps.count)
-                    }
-                    let g = UIImpactFeedbackGenerator(style: .soft)
-                    g.impactOccurred()
-                } label: {
-                    Text(activeStep == 0 ? "Begin" : (activeStep == steps.count - 1 ? "Complete" : "Next Step"))
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Color.purple)
-                        .cornerRadius(14)
-                }
-                .padding(.top, 8)
-            } else {
-                VStack(spacing: 8) {
+            // Completion
+            if activeStep >= steps.count {
+                VStack(spacing: 12) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 44))
                         .foregroundColor(.purple)
                     Text("Well done. Take a moment.")
                         .font(.headline)
                         .foregroundColor(.secondary)
-                    Button("Start Over") {
-                        withAnimation { activeStep = 0 }
+                    HStack(spacing: 16) {
+                        Button("Start Over") {
+                            withAnimation { activeStep = 0 }
+                            speech.stop()
+                        }
+                        .foregroundColor(.purple)
+
+                        Button("Done") {
+                            onComplete?()
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 12)
+                        .background(Color.purple)
+                        .cornerRadius(12)
                     }
-                    .foregroundColor(.purple)
-                    .padding(.top, 4)
                 }
-                .padding(.top, 16)
+                .padding(.vertical, 16)
             }
         }
         .padding(.vertical, 24)
+        .onDisappear { speech.stop() }
+        // Auto-advance: when TTS finishes naturally, advance to next step
+        .onChange(of: speech.naturalFinishCount) { _, _ in
+            guard autoAdvance, activeStep < steps.count else { return }
+            let next = activeStep + 1
+            withAnimation(.spring()) { activeStep = next }
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+            if next < steps.count {
+                speech.speak(steps[next], index: next)
+            }
+        }
+        // When auto-advance is turned on mid-session, start speaking the current step
+        .onChange(of: autoAdvance) { _, on in
+            if on, activeStep < steps.count {
+                speech.speak(steps[activeStep], index: activeStep)
+            } else {
+                speech.stop()
+            }
+        }
     }
 
     private func stepColor(_ i: Int) -> Color {
-        if i < activeStep { return .purple }
-        if i == activeStep { return .purple }
-        return Color.gray.opacity(0.2)
+        i <= activeStep ? .purple : Color.gray.opacity(0.2)
     }
 
     private func stepTextColor(_ i: Int) -> Color {
         if i < activeStep { return .secondary }
         if i == activeStep { return .primary }
         return .secondary.opacity(0.6)
+    }
+}
+
+// MARK: - Speech Manager
+
+fileprivate class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
+    private let synthesizer = AVSpeechSynthesizer()
+    @Published var isSpeaking = false
+    @Published var speakingIndex: Int = -1
+    /// Increments only on natural (non-interrupted) finish — safe to observe in onChange
+    @Published var naturalFinishCount: Int = 0
+    private var wasStopped = false
+
+    override init() {
+        super.init()
+        synthesizer.delegate = self
+    }
+
+    func speak(_ text: String, index: Int = 0) {
+        wasStopped = false
+        synthesizer.stopSpeaking(at: .immediate)
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = bestVoice()
+        utterance.rate = 0.45
+        utterance.postUtteranceDelay = 0.3
+        speakingIndex = index
+        isSpeaking = true
+        synthesizer.speak(utterance)
+    }
+
+    func stop() {
+        wasStopped = true
+        synthesizer.stopSpeaking(at: .immediate)
+        isSpeaking = false
+        speakingIndex = -1
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        DispatchQueue.main.async {
+            self.isSpeaking = false
+            self.speakingIndex = -1
+            if !self.wasStopped {
+                self.naturalFinishCount += 1
+            }
+            self.wasStopped = false
+        }
+    }
+
+    private func bestVoice() -> AVSpeechSynthesisVoice? {
+        let voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("en") }
+        return voices.first(where: { $0.quality == .premium })
+            ?? voices.first(where: { $0.quality == .enhanced })
+            ?? AVSpeechSynthesisVoice(language: "en-US")
     }
 }
 

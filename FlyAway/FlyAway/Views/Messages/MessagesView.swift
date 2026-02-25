@@ -3,6 +3,7 @@ import SwiftUI
 struct MessagesView: View {
     @StateObject private var messageManager = MessageManager()
     @State private var showingNewMessage = false
+    @State private var selectedThread: MessageThread?
     
     var body: some View {
         ZStack {
@@ -13,11 +14,12 @@ struct MessagesView: View {
             } else {
                 List {
                     ForEach(messageManager.messageThreads) { thread in
-                        NavigationLink(
-                            destination: MessageThreadView(thread: thread, messageManager: messageManager)
-                        ) {
+                        Button {
+                            selectedThread = thread
+                        } label: {
                             MessageThreadCard(thread: thread)
                         }
+                        .buttonStyle(.plain)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                         .listRowSeparator(.hidden)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -32,6 +34,9 @@ struct MessagesView: View {
                     }
                 }
                 .listStyle(.plain)
+                .navigationDestination(item: $selectedThread) { thread in
+                    MessageThreadView(thread: thread, messageManager: messageManager)
+                }
             }
         }
         .navigationTitle("Messages")

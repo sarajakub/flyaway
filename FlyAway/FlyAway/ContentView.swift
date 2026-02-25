@@ -49,7 +49,7 @@ struct MainTabView: View {
                 }
                 .tag(2)
             
-            NavigationView {
+            NavigationStack {
                 MessagesView()
             }
             .tabItem {
