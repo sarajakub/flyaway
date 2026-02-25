@@ -71,7 +71,13 @@ class MessageManager: ObservableObject {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 voiceRef.putFile(from: localURL, metadata: metadata) { _, error in
                     if let error = error {
-                        print("❌ Storage upload failed: \(error.localizedDescription)")
+                        // Log the raw Storage error code to distinguish:
+                        //   objectNotFound (404)  → bucket disabled / billing required (Blaze plan needed after Feb 3 2026) OR bad Security Rules
+                        //   unauthorized   (403)  → Security Rules are blocking write
+                        //   unauthenticated(401)  → user not signed in at Storage level
+                        //   bucketNotFound        → bucket not yet created in console
+                        let nsErr = error as NSError
+                        print("❌ Storage upload failed — code: \(nsErr.code), domain: \(nsErr.domain), description: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     } else {
                         print("✅ Voice uploaded to: \(voiceRef.fullPath)")
