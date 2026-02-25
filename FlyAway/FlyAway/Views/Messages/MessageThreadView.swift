@@ -226,6 +226,9 @@ struct VoiceBubble: View {
                 }
                 DispatchQueue.main.async {
                     do {
+                        // Route audio through speaker (not earpiece)
+                        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+                        try AVAudioSession.sharedInstance().setActive(true)
                         let audioPlayer = try AVAudioPlayer(data: data)
                         player = audioPlayer
                         audioPlayer.play()

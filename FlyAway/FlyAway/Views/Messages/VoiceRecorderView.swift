@@ -112,10 +112,12 @@ struct VoiceRecorderView: View {
 
             isRecording = true
             elapsed = 0
-            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            // Schedule on RunLoop.main so @State updates trigger redraws correctly
+            timer = Timer(timeInterval: 1, repeats: true) { [self] _ in
                 elapsed += 1
                 if elapsed >= 120 { stopRecording() } // 2-minute limit
             }
+            RunLoop.main.add(timer!, forMode: .common)
         } catch {
             print("❌ VoiceRecorder start error: \(error.localizedDescription)")
         }
