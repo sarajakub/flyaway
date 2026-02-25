@@ -41,22 +41,31 @@ class MessageManager: ObservableObject {
     
     // MARK: - Voice Messages
 
-    /// Uploads `localURL` to Firebase Storage then saves a voice message to Firestore.
+    /// Uploads the local .m4a at `localURL` to Firebase Storage, then saves a voice message to Firestore.
     func sendVoiceMessage(to recipientName: String, localURL: URL) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             await MainActor.run { self.errorMessage = "User not authenticated" }
             return
         }
 
+        // Guard against empty/corrupt recordings (common on Simulator)
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: localURL.path)[.size] as? Int) ?? 0
+        guard fileSize > 0 else {
+            print("❌ Voice message file is empty (\(localURL.lastPathComponent)) — skipping upload")
+            await MainActor.run { self.errorMessage = "Recording was empty. Please try again." }
+            return
+        }
+        print("🎙 Uploading voice message: \(localURL.lastPathComponent) (\(fileSize) bytes)")
+
         do {
-            // Upload audio file to Firebase Storage
+            // Upload directly from file URL — more reliable than loading into Data
             let voiceRef = Storage.storage().reference()
                 .child("voiceMessages/\(userId)/\(UUID().uuidString).m4a")
-            let audioData = try Data(contentsOf: localURL)
             let metadata = StorageMetadata()
             metadata.contentType = "audio/mp4"
-            _ = try await voiceRef.putDataAsync(audioData, metadata: metadata)
+            _ = try await voiceRef.putFileAsync(from: localURL, metadata: metadata)
             let downloadURL = try await voiceRef.downloadURL()
+            print("✅ Voice uploaded to: \(downloadURL)")
 
             // Save Firestore message record
             let message = Message(

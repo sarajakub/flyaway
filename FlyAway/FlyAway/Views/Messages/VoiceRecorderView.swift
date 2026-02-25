@@ -169,9 +169,10 @@ struct VoiceRecorderView: View {
         guard let url = recordingURL else { return }
         player?.stop()
         isPlaying = false
-        onSend(url)
+        // Nil out state before handing off so the recorder can't reuse the URL
         recordingURL = nil
         elapsed = 0
+        onSend(url)
     }
 
     // MARK: - Helpers
