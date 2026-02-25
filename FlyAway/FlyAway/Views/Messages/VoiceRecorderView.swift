@@ -115,7 +115,7 @@ struct VoiceRecorderView: View {
             // Schedule on RunLoop.main so @State updates trigger redraws correctly
             timer = Timer(timeInterval: 1, repeats: true) { [self] _ in
                 elapsed += 1
-                if elapsed >= 120 { stopRecording() } // 2-minute limit
+                if elapsed >= 90 { stopRecording() } // 90-second limit
             }
             RunLoop.main.add(timer!, forMode: .common)
         } catch {

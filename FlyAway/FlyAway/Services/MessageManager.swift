@@ -158,17 +158,47 @@ class MessageManager: ObservableObject {
     
     func deleteThread(recipientName: String) async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-        
+
         do {
             let snapshot = try await db.collection("messages")
                 .whereField("userId", isEqualTo: userId)
                 .whereField("recipientName", isEqualTo: recipientName)
                 .getDocuments()
-            
+
+            // Delete Storage files for any voice messages before removing Firestore docs
+            for document in snapshot.documents {
+                if let msg = try? document.data(as: Message.self),
+                   msg.isVoice,
+                   let path = msg.audioURL,
+                   !path.hasPrefix("https://") {
+                    try? await Storage.storage().reference(withPath: path).delete()
+                    print("🗑 Deleted Storage file: \(path)")
+                }
+            }
+
             for document in snapshot.documents {
                 try await document.reference.delete()
             }
-            
+
+            await fetchMessages()
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func deleteMessage(_ message: Message) async {
+        guard let docId = message.id else { return }
+
+        // Delete Storage file if this is a voice message
+        if message.isVoice, let path = message.audioURL, !path.hasPrefix("https://") {
+            try? await Storage.storage().reference(withPath: path).delete()
+            print("🗑 Deleted Storage file: \(path)")
+        }
+
+        do {
+            try await db.collection("messages").document(docId).delete()
             await fetchMessages()
         } catch {
             await MainActor.run {

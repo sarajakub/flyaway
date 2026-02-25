@@ -9,6 +9,8 @@ struct MessageThreadView: View {
     @State private var showingDeleteAlert = false
     @State private var messages: [Message] = []
     @State private var showingVoiceRecorder = false
+    @State private var messageToDelete: Message?
+    @State private var showDeleteMessageConfirmation = false
     @FocusState private var isMessageFieldFocused: Bool
     @Environment(\.dismiss) var dismiss
     
@@ -20,7 +22,10 @@ struct MessageThreadView: View {
                         DateHeaderView(date: group.date)
                         
                         ForEach(group.messages) { message in
-                            MessageBubble(message: message)
+                            MessageBubble(message: message) {
+                                messageToDelete = message
+                                showDeleteMessageConfirmation = true
+                            }
                         }
                     }
                 }
@@ -101,6 +106,23 @@ struct MessageThreadView: View {
         } message: {
             Text("Delete all messages with \(thread.recipientName)?")
         }
+        .confirmationDialog(
+            "Delete Message",
+            isPresented: $showDeleteMessageConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                guard let msg = messageToDelete else { return }
+                Task {
+                    await messageManager.deleteMessage(msg)
+                    await refreshMessages()
+                    messageToDelete = nil
+                }
+            }
+            Button("Cancel", role: .cancel) { messageToDelete = nil }
+        } message: {
+            Text("This message will be permanently deleted.")
+        }
     }
     
     private func sendMessage() {
@@ -145,6 +167,7 @@ struct DateHeaderView: View {
 
 struct MessageBubble: View {
     let message: Message
+    let onDelete: () -> Void
 
     var body: some View {
         HStack {
@@ -171,6 +194,13 @@ struct MessageBubble: View {
                     .padding(.leading, 4)
             }
             Spacer()
+        }
+        .contextMenu {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
         }
     }
 }
