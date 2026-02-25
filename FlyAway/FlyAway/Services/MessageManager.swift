@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 class MessageManager: ObservableObject {
     @Published var messageThreads: [MessageThread] = []
@@ -38,6 +39,47 @@ class MessageManager: ObservableObject {
         }
     }
     
+    // MARK: - Voice Messages
+
+    /// Uploads `localURL` to Firebase Storage then saves a voice message to Firestore.
+    func sendVoiceMessage(to recipientName: String, localURL: URL) async {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            await MainActor.run { self.errorMessage = "User not authenticated" }
+            return
+        }
+
+        do {
+            // Upload audio file to Firebase Storage
+            let voiceRef = Storage.storage().reference()
+                .child("voiceMessages/\(userId)/\(UUID().uuidString).m4a")
+            let audioData = try Data(contentsOf: localURL)
+            let metadata = StorageMetadata()
+            metadata.contentType = "audio/mp4"
+            _ = try await voiceRef.putDataAsync(audioData, metadata: metadata)
+            let downloadURL = try await voiceRef.downloadURL()
+
+            // Save Firestore message record
+            let message = Message(
+                userId: userId,
+                recipientName: recipientName,
+                content: "🎤 Voice message",
+                createdAt: Date(),
+                isRead: false,
+                isVoice: true,
+                audioURL: downloadURL.absoluteString
+            )
+            _ = try db.collection("messages").addDocument(from: message)
+            print("✅ Voice message saved")
+            await fetchMessages()
+
+            // Clean up temp file
+            try? FileManager.default.removeItem(at: localURL)
+        } catch {
+            print("❌ Error sending voice message: \(error.localizedDescription)")
+            await MainActor.run { self.errorMessage = error.localizedDescription }
+        }
+    }
+
     func fetchMessages() async {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         

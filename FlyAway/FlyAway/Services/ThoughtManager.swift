@@ -63,7 +63,16 @@ class ThoughtManager: ObservableObject {
         do {
             let docRef = try db.collection("thoughts").addDocument(from: thought)
             print("✅ Thought saved with ID: \(docRef.documentID)")
-            
+
+            // Schedule expiry notification when thought has a finite lifetime
+            if let expiresAt = thought.expiresAt {
+                NotificationManager.shared.scheduleExpiryNotification(
+                    thoughtId: docRef.documentID,
+                    content: thought.content,
+                    expiresAt: expiresAt
+                )
+            }
+
             // Log activity
             let activity = ThoughtActivity(
                 userId: userId,
@@ -346,6 +355,10 @@ class ThoughtManager: ObservableObject {
             try? db.collection("thoughtActivities").addDocument(from: activity)
             
             try await db.collection("thoughts").document(thoughtId).delete()
+
+            // Cancel any pending expiry notification for this thought
+            NotificationManager.shared.cancelExpiryNotification(thoughtId: thoughtId)
+
             await fetchUserThoughts()
         } catch {
             await MainActor.run {

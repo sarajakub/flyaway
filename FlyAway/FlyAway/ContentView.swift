@@ -9,20 +9,47 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authManager: AuthenticationManager
+    @EnvironmentObject var networkMonitor: NetworkMonitor
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some View {
-        Group {
-            if authManager.isAuthenticated {
-                if hasSeenOnboarding {
-                    MainTabView()
+        ZStack(alignment: .top) {
+            Group {
+                if authManager.isAuthenticated {
+                    if hasSeenOnboarding {
+                        MainTabView()
+                    } else {
+                        OnboardingView()
+                    }
                 } else {
-                    OnboardingView()
+                    AuthenticationView()
                 }
-            } else {
-                AuthenticationView()
+            }
+
+            if !networkMonitor.isConnected {
+                OfflineBanner()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(1)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: networkMonitor.isConnected)
+    }
+}
+
+struct OfflineBanner: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "wifi.slash")
+                .font(.caption.weight(.semibold))
+            Text("You're offline — changes will sync when reconnected")
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(Color.purple.opacity(0.9))
     }
 }
 
@@ -75,4 +102,5 @@ struct MainTabView: View {
         .environmentObject(ThoughtManager())
         .environmentObject(MilestoneManager())
         .environmentObject(MoodManager())
+        .environmentObject(NetworkMonitor())
 }

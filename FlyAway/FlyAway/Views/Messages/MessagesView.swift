@@ -34,10 +34,10 @@ struct MessagesView: View {
                     }
                 }
                 .listStyle(.plain)
-                .navigationDestination(item: $selectedThread) { thread in
-                    MessageThreadView(thread: thread, messageManager: messageManager)
-                }
             }
+        }
+        .navigationDestination(item: $selectedThread) { thread in
+            MessageThreadView(thread: thread, messageManager: messageManager)
         }
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)

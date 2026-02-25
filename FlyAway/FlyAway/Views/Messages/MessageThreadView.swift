@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct MessageThreadView: View {
     let thread: MessageThread
@@ -6,6 +7,7 @@ struct MessageThreadView: View {
     @State private var newMessageText = ""
     @State private var showingDeleteAlert = false
     @State private var messages: [Message] = []
+    @State private var showingVoiceRecorder = false
     @FocusState private var isMessageFieldFocused: Bool
     @Environment(\.dismiss) var dismiss
     
@@ -25,36 +27,54 @@ struct MessageThreadView: View {
             }
             
             Divider()
-            
-            HStack(spacing: 12) {
-                TextField("Type a message...", text: $newMessageText, axis: .vertical)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .padding(12)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(20)
-                    .lineLimit(1...5)
-                    .focused($isMessageFieldFocused)
-                    .submitLabel(.send)
-                    .onSubmit {
-                        if !newMessageText.isEmpty {
-                            sendMessage()
-                        }
+
+            if showingVoiceRecorder {
+                VoiceRecorderView { localURL in
+                    showingVoiceRecorder = false
+                    Task {
+                        await messageManager.sendVoiceMessage(to: thread.recipientName, localURL: localURL)
+                        await refreshMessages()
                     }
-                
-                Button(action: sendMessage) {
-                    Image(systemName: "paperplane.fill")
-                        .font(.title3)
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                        .background(
-                            Circle()
-                                .fill(newMessageText.isEmpty ? Color.gray : Color.purple)
-                        )
                 }
-                .disabled(newMessageText.isEmpty)
+                .padding()
+                .background(Color(.systemBackground))
+            } else {
+                HStack(spacing: 12) {
+                    Button(action: { showingVoiceRecorder = true }) {
+                        Image(systemName: "mic.fill")
+                            .font(.title3)
+                            .foregroundColor(.purple)
+                            .frame(width: 44, height: 44)
+                            .background(Circle().fill(Color.purple.opacity(0.1)))
+                    }
+
+                    TextField("Type a message...", text: $newMessageText, axis: .vertical)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(12)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(20)
+                        .lineLimit(1...5)
+                        .focused($isMessageFieldFocused)
+                        .submitLabel(.send)
+                        .onSubmit {
+                            if !newMessageText.isEmpty { sendMessage() }
+                        }
+
+                    Button(action: sendMessage) {
+                        Image(systemName: "paperplane.fill")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                Circle()
+                                    .fill(newMessageText.isEmpty ? Color.gray : Color.purple)
+                            )
+                    }
+                    .disabled(newMessageText.isEmpty)
+                }
+                .padding()
+                .background(Color(.systemBackground))
             }
-            .padding()
-            .background(Color(.systemBackground))
         }
         .navigationTitle(thread.recipientName)
         .navigationBarTitleDisplayMode(.inline)
@@ -124,30 +144,99 @@ struct DateHeaderView: View {
 
 struct MessageBubble: View {
     let message: Message
-    
+
+    @State private var player: AVAudioPlayer?
+    @State private var isPlaying = false
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
-                Text(message.content)
-                    .font(.body)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [Color.purple, Color.blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                if message.isVoice {
+                    VoiceBubble(audioURL: message.audioURL, player: $player, isPlaying: $isPlaying)
+                } else {
+                    Text(message.content)
+                        .font(.body)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                colors: [Color.purple, Color.blue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                    )
-                    .cornerRadius(20)
-                
+                        .cornerRadius(20)
+                }
+
                 Text(message.createdAt, style: .time)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
             }
-            
+
             Spacer()
+        }
+    }
+}
+
+struct VoiceBubble: View {
+    let audioURL: String?
+    @Binding var player: AVAudioPlayer?
+    @Binding var isPlaying: Bool
+
+    var body: some View {
+        Button(action: togglePlayback) {
+            HStack(spacing: 10) {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(.white)
+
+                Image(systemName: "waveform")
+                    .font(.title3)
+                    .foregroundColor(.white.opacity(0.85))
+
+                Text("Voice message")
+                    .font(.callout)
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: [Color.purple, Color.blue],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(20)
+        }
+    }
+
+    private func togglePlayback() {
+        if isPlaying {
+            player?.pause()
+            isPlaying = false
+        } else {
+            guard let urlString = audioURL, let url = URL(string: urlString) else { return }
+            URLSession.shared.dataTask(with: url) { data, _, error in
+                guard let data = data, error == nil else {
+                    print("❌ Voice message download error: \(error?.localizedDescription ?? \"unknown\")")
+                    return
+                }
+                DispatchQueue.main.async {
+                    do {
+                        let audioPlayer = try AVAudioPlayer(data: data)
+                        player = audioPlayer
+                        audioPlayer.play()
+                        isPlaying = true
+                        Timer.scheduledTimer(withTimeInterval: audioPlayer.duration, repeats: false) { _ in
+                            isPlaying = false
+                        }
+                    } catch {
+                        print("❌ Voice message playback error: \(error.localizedDescription)")
+                    }
+                }
+            }.resume()
         }
     }
 }
