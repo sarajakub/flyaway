@@ -60,6 +60,7 @@ struct OnboardingView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding()
+                        .accessibilityHint("Jumps to the last page")
                     } else {
                         // Spacer to keep layout consistent
                         Text("")
@@ -77,7 +78,7 @@ struct OnboardingView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut, value: currentPage)
 
-                // Page indicator dots
+                // Page indicator dots — hidden from VoiceOver (TabView navigation is accessible)
                 HStack(spacing: 8) {
                     ForEach(pages.indices, id: \.self) { index in
                         Capsule()
@@ -86,6 +87,7 @@ struct OnboardingView: View {
                             .animation(.spring(response: 0.3), value: currentPage)
                     }
                 }
+                .accessibilityHidden(true)
                 .padding(.bottom, 24)
 
                 // Action button
@@ -114,8 +116,10 @@ struct OnboardingView: View {
     }
 
     private func advance() {
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        if !UIAccessibility.isReduceMotionEnabled {
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
 
         if currentPage < pages.count - 1 {
             withAnimation(.easeInOut(duration: 0.4)) {

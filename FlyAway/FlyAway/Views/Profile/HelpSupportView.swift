@@ -27,6 +27,7 @@ struct HelpSupportView: View {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.red)
+                            .accessibilityHidden(true)
                         Text("Crisis Resources")
                             .font(.title3)
                             .fontWeight(.bold)
@@ -74,6 +75,7 @@ struct HelpSupportView: View {
                     HStack {
                         Image(systemName: "book.fill")
                             .foregroundColor(.purple)
+                            .accessibilityHidden(true)
                         Text("How to Use FlyAway")
                             .font(.title3)
                             .fontWeight(.bold)
@@ -97,6 +99,7 @@ struct HelpSupportView: View {
                     HStack {
                         Image(systemName: "lock.shield.fill")
                             .foregroundColor(.green)
+                            .accessibilityHidden(true)
                         Text("Privacy & Safety")
                             .font(.title3)
                             .fontWeight(.bold)
@@ -119,6 +122,7 @@ struct HelpSupportView: View {
                     HStack {
                         Image(systemName: "megaphone.fill")
                             .foregroundColor(.purple)
+                            .accessibilityHidden(true)
                         Text("Share Feedback")
                             .font(.title3)
                             .fontWeight(.bold)
@@ -132,6 +136,7 @@ struct HelpSupportView: View {
                             Image(systemName: "exclamationmark.bubble.fill")
                                 .font(.title3)
                                 .foregroundColor(.purple)
+                                .accessibilityHidden(true)
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Report Bugs or Request Features")
@@ -148,6 +153,7 @@ struct HelpSupportView: View {
                             
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                         .padding()
                         .background(Color.purple.opacity(0.1))

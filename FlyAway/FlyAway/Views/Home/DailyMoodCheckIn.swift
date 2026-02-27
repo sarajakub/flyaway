@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DailyMoodCheckIn: View {
     @EnvironmentObject var moodManager: MoodManager
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     @Environment(\.dismiss) var dismiss
     @State private var selectedMood: Int?
     @State private var showNoteOption = false
@@ -27,9 +28,7 @@ struct DailyMoodCheckIn: View {
                         Image(systemName: "heart.text.square.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.purple)
-                        
-                        Text("How are you feeling today?")
-                            .font(.title2)
+                        .accessibilityHidden(true)
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
                         
@@ -175,8 +174,10 @@ struct DailyMoodCheckIn: View {
         let note = noteText.isEmpty ? nil : noteText
         await moodManager.saveMood(mood: mood, note: note)
         await MainActor.run {
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            if !a11ySettings.hapticsReduced {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+            }
             dismiss()
         }
     }
@@ -185,4 +186,5 @@ struct DailyMoodCheckIn: View {
 #Preview {
     DailyMoodCheckIn()
         .environmentObject(MoodManager())
+        .environmentObject(AccessibilitySettings())
 }

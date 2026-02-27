@@ -41,6 +41,7 @@ struct OfflineBanner: View {
         HStack(spacing: 6) {
             Image(systemName: "wifi.slash")
                 .font(.caption.weight(.semibold))
+                .accessibilityHidden(true)
             Text("You're offline — changes will sync when reconnected")
                 .font(.caption.weight(.semibold))
                 .lineLimit(1)

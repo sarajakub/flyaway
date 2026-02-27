@@ -49,6 +49,8 @@ struct MessagesView: View {
                         .font(.title3)
                         .foregroundColor(.purple)
                 }
+                .accessibilityLabel("New message")
+                .accessibilityHint("Compose a message to someone you can no longer reach")
             }
         }
         .sheet(isPresented: $showingNewMessage, onDismiss: {
@@ -90,6 +92,7 @@ struct EmptyMessagesView: View {
             Image(systemName: "message.circle")
                 .font(.system(size: 80))
                 .foregroundColor(.purple.opacity(0.6))
+                .accessibilityHidden(true)
             
             VStack(spacing: 8) {
                 Text("No Messages Yet")
@@ -139,6 +142,7 @@ struct MessageThreadCard: View {
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                 )
+                .accessibilityHidden(true)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(thread.recipientName)

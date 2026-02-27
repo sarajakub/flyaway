@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CommunityView: View {
     @EnvironmentObject var thoughtManager: ThoughtManager
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     @State private var selectedCategory: Thought.ThoughtCategory?
     @State private var sortOption: CommunitySortOption = .recent
     @State private var searchText = ""
@@ -52,6 +53,7 @@ struct CommunityView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
+                        .accessibilityHidden(true)
                     TextField("Search thoughts...", text: $searchText)
                         .focused($isSearchFocused)
                         .submitLabel(.search)
@@ -67,6 +69,7 @@ struct CommunityView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.gray)
                         }
+                        .accessibilityLabel("Clear search")
                     }
                 }
                 .padding()
@@ -87,6 +90,9 @@ struct CommunityView: View {
                                 .foregroundColor(selectedCategory == nil ? .white : .primary)
                                 .cornerRadius(20)
                         }
+                        .accessibilityLabel(selectedCategory == nil ? "All, selected" : "All")
+                        .accessibilityHint(selectedCategory == nil ? "Double-tap to remove filter" : "Double-tap to show all categories")
+                        .accessibilityAddTraits(selectedCategory == nil ? [.isSelected] : [])
                         
                         ForEach(Thought.ThoughtCategory.allCases, id: \.self) { category in
                             CategoryChip(
@@ -120,29 +126,34 @@ struct CommunityView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(CommunitySortOption.allCases, id: \.self) { option in
-                                Button {
-                                    sortOption = option
-                                    let generator = UIImpactFeedbackGenerator(style: .light)
-                                    generator.impactOccurred()
-                                } label: {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: option.icon)
-                                            .font(.caption)
-                                        Text(option.rawValue)
-                                            .font(.caption)
-                                            .fontWeight(.medium)
+                                    Button {
+                                        sortOption = option
+                                        if !a11ySettings.hapticsReduced {
+                                            let generator = UIImpactFeedbackGenerator(style: .light)
+                                            generator.impactOccurred()
+                                        }
+                                    } label: {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: option.icon)
+                                                .font(.caption)
+                                                .accessibilityHidden(true)
+                                            Text(option.rawValue)
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(sortOption == option ? Color.purple : Color(.systemGray6))
+                                        .foregroundColor(sortOption == option ? .white : .primary)
+                                        .cornerRadius(18)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 18)
+                                                .stroke(sortOption == option ? Color.purple : Color.clear, lineWidth: 2)
+                                        )
                                     }
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 8)
-                                    .background(sortOption == option ? Color.purple : Color(.systemGray6))
-                                    .foregroundColor(sortOption == option ? .white : .primary)
-                                    .cornerRadius(18)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 18)
-                                            .stroke(sortOption == option ? Color.purple : Color.clear, lineWidth: 2)
-                                    )
+                                    .accessibilityLabel(sortOption == option ? "\(option.rawValue), selected" : option.rawValue)
+                                    .accessibilityAddTraits(sortOption == option ? [.isSelected] : [])
                                 }
-                            }
                         }
                         .padding(.horizontal)
                     }
@@ -163,6 +174,7 @@ struct CommunityView: View {
                         Image(systemName: "person.3")
                             .font(.system(size: 80))
                             .foregroundColor(.purple.opacity(0.6))
+                            .accessibilityHidden(true)
                         
                         VStack(spacing: 8) {
                             Text(thoughtManager.thoughts.isEmpty ? "No Community Thoughts Yet" : "No Matching Thoughts")
@@ -249,6 +261,7 @@ struct CommunityView: View {
 struct CommunityThoughtCard: View {
     let thought: Thought
     @EnvironmentObject var thoughtManager: ThoughtManager
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     @State private var isSaved = false
     @State private var isCheckingSaved = true
     @State private var userReactions: Set<Reaction.ReactionType> = []
@@ -263,6 +276,7 @@ struct CommunityThoughtCard: View {
                     
                     HStack(spacing: 4) {
                         Text(thought.category.emoji)
+                            .accessibilityHidden(true)
                         Text(thought.category.rawValue)
                             .font(.caption)
                     }
@@ -270,6 +284,8 @@ struct CommunityThoughtCard: View {
                     .padding(.vertical, 2)
                     .background(Color.purple.opacity(0.1))
                     .cornerRadius(8)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(thought.category.rawValue)
                 }
                 
                 Spacer()
@@ -281,6 +297,8 @@ struct CommunityThoughtCard: View {
                 }
                 .opacity(isCheckingSaved ? 0.5 : 1.0)
                 .disabled(isCheckingSaved)
+                .accessibilityLabel(isSaved ? "Unsave thought" : "Save thought")
+                .accessibilityHint(isSaved ? "Double-tap to remove from saved" : "Double-tap to save for later")
             }
             
             Text(thought.content)
@@ -288,7 +306,7 @@ struct CommunityThoughtCard: View {
                 .lineLimit(nil)
                 .padding(.bottom, 12)
             
-            // Reactions - Twitter style
+            // Reactions
             HStack(spacing: 20) {
                 ForEach(Reaction.ReactionType.allCases, id: \.self) { type in
                     Button {
@@ -297,6 +315,7 @@ struct CommunityThoughtCard: View {
                         HStack(spacing: 6) {
                             Text(type.rawValue)
                                 .font(.body)
+                                .accessibilityHidden(true)
                             
                             if let count = thought.reactionCounts[type.rawValue], count > 0 {
                                 Text("\(count)")
@@ -311,6 +330,8 @@ struct CommunityThoughtCard: View {
                         .background(userReactions.contains(type) ? Color.purple.opacity(0.1) : Color.clear)
                         .cornerRadius(12)
                     }
+                    .accessibilityLabel(reactionAccessibilityLabel(type))
+                    .accessibilityHint(userReactions.contains(type) ? "Double-tap to remove" : "Double-tap to react")
                 }
                 
                 Spacer()
@@ -339,13 +360,22 @@ struct CommunityThoughtCard: View {
         }
     }
     
+    private func reactionAccessibilityLabel(_ type: Reaction.ReactionType) -> String {
+        let count = thought.reactionCounts[type.rawValue] ?? 0
+        let selected = userReactions.contains(type) ? ", selected" : ""
+        let countText = count > 0 ? ", \(count)" : ""
+        return "\(type.label)\(selected)\(countText)"
+    }
+
     private func loadUserReactions() async {
         userReactions = await thoughtManager.getUserReactions(thought)
     }
     
     private func toggleReaction(_ type: Reaction.ReactionType) {
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        if !a11ySettings.hapticsReduced {
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
         
         Task {
             if userReactions.contains(type) {
@@ -364,8 +394,10 @@ struct CommunityThoughtCard: View {
     }
     
     private func toggleSave() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        if !a11ySettings.hapticsReduced {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+        }
         
         Task {
             if isSaved {
@@ -382,4 +414,5 @@ struct CommunityThoughtCard: View {
 #Preview {
     CommunityView()
         .environmentObject(ThoughtManager())
+        .environmentObject(AccessibilitySettings())
 }
