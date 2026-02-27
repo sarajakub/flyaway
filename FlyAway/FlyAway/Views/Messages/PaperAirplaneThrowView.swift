@@ -57,6 +57,8 @@ private enum ThrowPhase {
 struct PaperAirplaneThrowView: View {
     let onComplete: () -> Void
 
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
+
     @State private var phase: ThrowPhase = .folding
     @State private var foldProgress: CGFloat = 0.0
     @State private var confirmOpacity: Double = 0.0
@@ -70,6 +72,12 @@ struct PaperAirplaneThrowView: View {
     @State private var hintOpacity: Double = 0.0
 
     var body: some View {
+        // ── Reduce Motion path: simple confirmation, no animation ──────────
+        if a11ySettings.motionReduced {
+            reducedMotionConfirmation
+            return
+        }
+
         GeometryReader { geo in
             ZStack {
                 // ── Near-full dark background — form content should not compete ──
@@ -157,6 +165,55 @@ struct PaperAirplaneThrowView: View {
             }
         }
         .onAppear { startFold() }
+    }
+
+    // MARK: - Reduced Motion Confirmation
+    /// Simple static confirmation shown when system or in-app Reduce Motion is on.
+    private var reducedMotionConfirmation: some View {
+        ZStack {
+            Color.black.opacity(0.90)
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+
+            VStack(spacing: 28) {
+                Image(systemName: "paperplane.fill")
+                    .font(.system(size: 52))
+                    .foregroundColor(.white)
+                    .accessibilityHidden(true)
+
+                VStack(spacing: 8) {
+                    Text("Thought Sent")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Text("Your thought has been released.")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.70))
+                        .multilineTextAlignment(.center)
+                }
+
+                Button {
+                    onComplete()
+                } label: {
+                    Text("Done")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.white)
+                        .cornerRadius(14)
+                }
+                .padding(.horizontal, 48)
+                .accessibilityLabel("Done")
+                .accessibilityHint("Closes this confirmation")
+            }
+            .padding(32)
+        }
+        .onAppear {
+            // Auto-dismiss after 2s so the screen doesn't require interaction
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { onComplete() }
+        }
     }
 
     // MARK: - Plane Stack

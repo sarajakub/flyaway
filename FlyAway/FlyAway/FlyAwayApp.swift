@@ -16,6 +16,7 @@ struct FlyAwayApp: App {
     @StateObject private var milestoneManager = MilestoneManager()
     @StateObject private var moodManager = MoodManager()
     @StateObject private var networkMonitor = NetworkMonitor()
+    @StateObject private var a11ySettings = AccessibilitySettings()
 
     init() {
         FirebaseApp.configure()
@@ -38,6 +39,7 @@ struct FlyAwayApp: App {
                 .environmentObject(milestoneManager)
                 .environmentObject(moodManager)
                 .environmentObject(networkMonitor)
+                .environmentObject(a11ySettings)
         }
     }
 }

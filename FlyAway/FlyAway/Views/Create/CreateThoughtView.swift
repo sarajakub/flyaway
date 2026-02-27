@@ -16,6 +16,7 @@ struct CreateThoughtView: View {
     
     @EnvironmentObject var thoughtManager: ThoughtManager
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     
     var body: some View {
         ScrollView {
@@ -202,7 +203,9 @@ struct CreateThoughtView: View {
                     showingError = true
                 } else {
                     let generator = UINotificationFeedbackGenerator()
-                    generator.notificationOccurred(.success)
+                    if !a11ySettings.hapticsReduced {
+                        generator.notificationOccurred(.success)
+                    }
                     showingThrowAnimation = true
                 }
             }

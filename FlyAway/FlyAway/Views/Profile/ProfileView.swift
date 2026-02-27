@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @EnvironmentObject var authManager: AuthenticationManager
@@ -145,6 +146,8 @@ struct StatView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(number) \(label)")
     }
 }
 
@@ -159,6 +162,7 @@ struct MenuItemView: View {
                 .font(.title3)
                 .foregroundColor(color)
                 .frame(width: 28)
+                .accessibilityHidden(true)
             
             Text(title)
                 .font(.body)
@@ -169,6 +173,7 @@ struct MenuItemView: View {
             Image(systemName: "chevron.right")
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .accessibilityHidden(true)
         }
         .padding()
     }

@@ -4,6 +4,7 @@ struct HomeView: View {
     @EnvironmentObject var thoughtManager: ThoughtManager
     @EnvironmentObject var milestoneManager: MilestoneManager
     @EnvironmentObject var moodManager: MoodManager
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     @State private var selectedFilter: Thought.ThoughtCategory?
     @State private var showingAddMilestone = false
     @State private var showingMoodCheckIn = false
@@ -85,6 +86,7 @@ struct HomeView: View {
                             
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.green)
+                                .accessibilityHidden(true)
                         }
                         .padding()
                         .background(Color(.systemGray6))
@@ -109,6 +111,7 @@ struct HomeView: View {
                                         .font(.title3)
                                         .foregroundColor(.purple)
                                 }
+                                .accessibilityLabel("Add milestone")
                             }
                             .padding(.horizontal)
                             
@@ -206,6 +209,7 @@ struct HomeView: View {
                             Image(systemName: "brain.head.profile")
                                 .font(.system(size: 80))
                                 .foregroundColor(.purple.opacity(0.6))
+                                .accessibilityHidden(true)
                             
                             VStack(spacing: 8) {
                                 Text(thoughtManager.thoughts.isEmpty ? "No Thoughts Yet" : "No Matching Thoughts")
@@ -254,8 +258,10 @@ struct HomeView: View {
         .overlay(alignment: .bottomTrailing) {
             Button {
                 showingCreateThought = true
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
+                if !a11ySettings.hapticsReduced {
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred()
+                }
             } label: {
                 Image(systemName: "plus")
                     .font(.title2)
@@ -266,6 +272,8 @@ struct HomeView: View {
                     .clipShape(Circle())
                     .shadow(color: .purple.opacity(0.3), radius: 8, x: 0, y: 4)
             }
+            .accessibilityLabel("Create thought")
+            .accessibilityHint("Opens the compose screen")
             .padding(.trailing, 20)
             .padding(.bottom, 20)
         }
@@ -289,6 +297,7 @@ struct CategoryChip: View {
             HStack(spacing: 6) {
                 Text(category.emoji)
                     .font(.body)
+                    .accessibilityHidden(true)
                 Text(category.rawValue)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -299,6 +308,9 @@ struct CategoryChip: View {
             .foregroundColor(isSelected ? .white : .primary)
             .cornerRadius(20)
         }
+        .accessibilityLabel(isSelected ? "\(category.rawValue), selected" : category.rawValue)
+        .accessibilityHint(isSelected ? "Double-tap to remove filter" : "Double-tap to filter by \(category.rawValue)")
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
