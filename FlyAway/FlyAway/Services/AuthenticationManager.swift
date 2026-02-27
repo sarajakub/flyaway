@@ -51,6 +51,7 @@ class AuthenticationManager: ObservableObject {
             await MainActor.run {
                 self.currentUser = newUser
                 self.isAuthenticated = true
+                AnalyticsManager.logSignUp()
             }
         } catch {
             await MainActor.run {
@@ -66,6 +67,7 @@ class AuthenticationManager: ObservableObject {
             
             await MainActor.run {
                 self.isAuthenticated = true
+                AnalyticsManager.logSignIn()
             }
         } catch {
             await MainActor.run {
@@ -94,6 +96,61 @@ class AuthenticationManager: ObservableObject {
             currentUser = nil
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Permanently deletes all user data from Firestore and the Firebase Auth account.
+    /// Collections erased: users, thoughts, messages, thoughtActivities, savedThoughts,
+    /// moodEntries, milestones, reactions.
+    func deleteAccount() async {
+        guard let user = auth.currentUser else {
+            await MainActor.run { self.errorMessage = "Not signed in" }
+            return
+        }
+        let uid = user.uid
+
+        do {
+            // 1. Delete user-owned Firestore documents in parallel
+            async let _ = deleteCollection("thoughts",          field: "userId",    value: uid)
+            async let _ = deleteCollection("messages",          field: "userId",    value: uid)
+            async let _ = deleteCollection("thoughtActivities", field: "userId",    value: uid)
+            async let _ = deleteCollection("savedThoughts",     field: "userId",    value: uid)
+            async let _ = deleteCollection("moodEntries",       field: "userId",    value: uid)
+            async let _ = deleteCollection("milestones",        field: "userId",    value: uid)
+            async let _ = deleteCollection("reactions",         field: "userId",    value: uid)
+
+            // 2. Delete user profile document
+            try await db.collection("users").document(uid).delete()
+
+            // 3. Delete Firebase Auth account
+            try await user.delete()
+
+            await MainActor.run {
+                self.isAuthenticated = false
+                self.currentUser = nil
+                AnalyticsManager.logAccountDeleted()
+                print("✅ Account deleted for UID: \(uid)")
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = "Account deletion failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    // MARK: - Private helpers
+
+    /// Deletes all documents in `collection` where `field` == `value`, in batches of 100.
+    private func deleteCollection(_ collection: String, field: String, value: String) async {
+        do {
+            let snapshot = try await db.collection(collection)
+                .whereField(field, isEqualTo: value)
+                .getDocuments()
+            let batch = db.batch()
+            snapshot.documents.forEach { batch.deleteDocument($0.reference) }
+            try await batch.commit()
+        } catch {
+            print("⚠️ Could not delete \(collection) for user: \(error.localizedDescription)")
         }
     }
     

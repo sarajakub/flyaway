@@ -173,6 +173,7 @@ struct DailyMoodCheckIn: View {
         isSaving = true
         let note = noteText.isEmpty ? nil : noteText
         await moodManager.saveMood(mood: mood, note: note)
+        AnalyticsManager.logMoodCheckedIn(mood: "\(mood)")
         await MainActor.run {
             if !a11ySettings.hapticsReduced {
                 let generator = UINotificationFeedbackGenerator()

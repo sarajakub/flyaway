@@ -265,7 +265,8 @@ struct CommunityThoughtCard: View {
     @State private var isSaved = false
     @State private var isCheckingSaved = true
     @State private var userReactions: Set<Reaction.ReactionType> = []
-    
+    @State private var showingReportSheet = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -289,7 +290,8 @@ struct CommunityThoughtCard: View {
                 }
                 
                 Spacer()
-                
+
+                // Save button
                 Button(action: toggleSave) {
                     Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                         .foregroundColor(isSaved ? .purple : .gray)
@@ -299,6 +301,24 @@ struct CommunityThoughtCard: View {
                 .disabled(isCheckingSaved)
                 .accessibilityLabel(isSaved ? "Unsave thought" : "Save thought")
                 .accessibilityHint(isSaved ? "Double-tap to remove from saved" : "Double-tap to save for later")
+
+                // Report button
+                Button {
+                    showingReportSheet = true
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(.secondary)
+                        .font(.body)
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("More options")
+                .accessibilityHint("Report this thought")
+                .sheet(isPresented: $showingReportSheet) {
+                    ReportContentSheet(
+                        thoughtId: thought.id ?? "",
+                        reportedUserId: thought.userId
+                    )
+                }
             }
             
             Text(thought.content)

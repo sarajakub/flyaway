@@ -207,6 +207,13 @@ struct CreateThoughtView: View {
                         generator.notificationOccurred(.success)
                     }
                     showingThrowAnimation = true
+                    AnalyticsManager.logThoughtCreated(
+                        category: selectedCategory.rawValue,
+                        isPublic: isPublic
+                    )
+                    if sendToEther {
+                        AnalyticsManager.logThoughtSentToEther(category: selectedCategory.rawValue)
+                    }
                 }
             }
         }

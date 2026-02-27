@@ -246,11 +246,27 @@ struct SavedThoughtsSheet: View {
 
 struct SettingsSheet: View {
     @ObservedObject var authManager: AuthenticationManager
+    @EnvironmentObject var a11ySettings: AccessibilitySettings
     @Environment(\.dismiss) var dismiss
-    
+
+    @AppStorage("pref_notifications") private var notificationsEnabled = true
+    @AppStorage("pref_publicProfile")  private var publicProfileEnabled = true
+
+    @State private var showingDeleteConfirm = false
+    @State private var isDeletingAccount    = false
+    @State private var deleteError: String?
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+    }
+
     var body: some View {
         NavigationView {
             List {
+                // MARK: Account
                 Section("Account") {
                     HStack {
                         Text("Email")
@@ -259,25 +275,72 @@ struct SettingsSheet: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
+                // MARK: Preferences
                 Section("Preferences") {
-                    Toggle("Notifications", isOn: .constant(true))
-                    Toggle("Public Profile", isOn: .constant(true))
+                    Toggle("Notifications", isOn: $notificationsEnabled)
+                    Toggle("Public Profile",  isOn: $publicProfileEnabled)
                 }
-                
+
+                // MARK: Accessibility
+                Section("Accessibility") {
+                    Toggle("Reduce Motion",   isOn: $a11ySettings.reduceMotion)
+                    Toggle("Reduce Haptics",  isOn: $a11ySettings.reduceHaptics)
+                    Toggle("Increase Contrast", isOn: $a11ySettings.increaseContrast)
+                    Button("System Accessibility Settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .foregroundColor(.accentColor)
+                }
+
+                // MARK: About
                 Section("About") {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0.0")
+                        Text("\(appVersion) (\(buildNumber))")
                             .foregroundColor(.secondary)
                     }
                     NavigationLink("Privacy Policy") {
-                        Text("Privacy Policy - Coming Soon")
+                        PrivacyPolicyView()
                     }
                     NavigationLink("Terms of Service") {
-                        Text("Terms of Service - Coming Soon")
+                        TermsOfServiceView()
                     }
+                }
+
+                // MARK: Danger Zone
+                Section {
+                    if let err = deleteError {
+                        Text(err)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+
+                    Button(role: .destructive) {
+                        if !a11ySettings.hapticsReduced {
+                            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        }
+                        showingDeleteConfirm = true
+                    } label: {
+                        HStack {
+                            if isDeletingAccount {
+                                ProgressView()
+                                    .padding(.trailing, 6)
+                            }
+                            Text(isDeletingAccount ? "Deleting account…" : "Delete Account")
+                        }
+                    }
+                    .disabled(isDeletingAccount)
+                    .accessibilityLabel("Delete account")
+                    .accessibilityHint("Permanently removes all your data from FlyAway")
+                } header: {
+                    Text("Danger Zone")
+                } footer: {
+                    Text("Deleting your account permanently removes all your thoughts, messages, and data. This cannot be undone.")
+                        .font(.caption)
                 }
             }
             .navigationTitle("Settings")
@@ -286,6 +349,27 @@ struct SettingsSheet: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .confirmationDialog(
+                "Delete Account",
+                isPresented: $showingDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete My Account", role: .destructive) {
+                    Task {
+                        isDeletingAccount = true
+                        deleteError = nil
+                        await authManager.deleteAccount()
+                        if authManager.errorMessage != nil {
+                            deleteError = authManager.errorMessage
+                            isDeletingAccount = false
+                        }
+                        // On success, AuthenticationManager clears currentUser → app navigates away automatically.
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("All your thoughts, messages, mood history, and account information will be permanently deleted. This cannot be undone.")
             }
         }
     }
