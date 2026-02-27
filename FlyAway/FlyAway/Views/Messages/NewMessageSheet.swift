@@ -7,7 +7,6 @@ struct NewMessageSheet: View {
     @State private var recipientName = ""
     @State private var messageText = ""
     @State private var isSending = false
-    @State private var showingThrowAnimation = false
     @FocusState private var focusedField: Field?
     
     enum Field {
@@ -108,15 +107,6 @@ struct NewMessageSheet: View {
                     focusedField = .recipient
                 }
             }
-            .overlay {
-                if showingThrowAnimation {
-                    PaperAirplaneThrowView {
-                        dismiss()
-                    }
-                    .transition(.opacity)
-                }
-            }
-            .animation(.easeInOut(duration: 0.25), value: showingThrowAnimation)
         }
     }
     
@@ -124,14 +114,14 @@ struct NewMessageSheet: View {
         isSending = true
         focusedField = nil
 
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+
         Task {
             await messageManager.sendMessage(to: recipientName, content: messageText)
 
             await MainActor.run {
-                isSending = false
-                let generator = UINotificationFeedbackGenerator()
-                generator.notificationOccurred(.success)
-                showingThrowAnimation = true
+                dismiss()
             }
         }
     }

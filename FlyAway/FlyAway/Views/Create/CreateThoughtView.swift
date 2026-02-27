@@ -9,7 +9,7 @@ struct CreateThoughtView: View {
     @State private var postAsAnonymous = true
     @State private var sendToEther = false
     @State private var keepForDays: Int?
-    @State private var showingSuccess = false
+    @State private var showingThrowAnimation = false
     @State private var showingError = false
     @State private var isSaving = false
     @FocusState private var isTextFieldFocused: Bool
@@ -160,24 +160,22 @@ struct CreateThoughtView: View {
         .onTapGesture {
             isTextFieldFocused = false
         }
-        .alert("Thought Shared", isPresented: $showingSuccess) {
-            Button("OK") {
-                thoughtText = ""
-                selectedCategory = .reflection
-                sendToEther = false
-                keepForDays = nil
-                postAsAnonymous = true
-                isTextFieldFocused = false
-            }
-        } message: {
-            Text(sendToEther ? "Your thought has been released into the ether." : "Your thought has been shared successfully!")
-        }
-        .onChange(of: showingSuccess) { _, newValue in
-            if newValue {
-                let generator = UINotificationFeedbackGenerator()
-                generator.notificationOccurred(.success)
+        .overlay {
+            if showingThrowAnimation {
+                PaperAirplaneThrowView {
+                    showingThrowAnimation = false
+                    thoughtText = ""
+                    selectedCategory = .reflection
+                    sendToEther = false
+                    keepForDays = nil
+                    postAsAnonymous = true
+                    isTextFieldFocused = false
+                    if isDismissable { dismiss() }
+                }
+                .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: showingThrowAnimation)
         .alert("Error", isPresented: $showingError) {
             Button("OK") { thoughtManager.errorMessage = nil }
         } message: {
@@ -203,7 +201,9 @@ struct CreateThoughtView: View {
                 if thoughtManager.errorMessage != nil {
                     showingError = true
                 } else {
-                    showingSuccess = true
+                    let generator = UINotificationFeedbackGenerator()
+                    generator.notificationOccurred(.success)
+                    showingThrowAnimation = true
                 }
             }
         }
